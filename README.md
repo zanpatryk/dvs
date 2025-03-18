@@ -4,7 +4,7 @@
 
 Smart contracts: Solidity, Foundry ( framework )
 
-Front-end: Next.js, Tailwind
+Front-end: Vite, Tailwind
 
 Database: NeonDB, PostgreSQL, DrizzleORM
 
