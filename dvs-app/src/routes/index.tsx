@@ -1,10 +1,15 @@
-import { RainbowButton } from "@/components/ui/rainbow-button";
-import Navbar from "@/LandingPage/Navbar";
+import Navbar from '@/components/navbar';
+import { RainbowButton } from '@/components/ui/rainbow-button';
+import { createFileRoute } from '@tanstack/react-router'
 
-function App() {
-	return (
+export const Route = createFileRoute('/')({
+    component: Index,
+})
+
+function Index() {
+    return (
 		<>
-			<div className="relative overflow-hidden h-svh">
+			<div>
 				<Navbar />
 				<div className="flex flex-col items-center justify-center space-y-20">
 					<h1 className="text-8xl font-bold">Welcome</h1>
@@ -32,5 +37,3 @@ function App() {
 		</>
 	);
 }
-
-export default App;
