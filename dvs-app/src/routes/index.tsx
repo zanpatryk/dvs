@@ -1,4 +1,5 @@
 import Navbar from '@/components/navbar';
+import { ThemeProvider } from '@/components/theme-provider';
 import { RainbowButton } from '@/components/ui/rainbow-button';
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -8,7 +9,7 @@ export const Route = createFileRoute('/')({
 
 function Index() {
     return (
-		<>
+		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
 			<div>
 				<Navbar />
 				<div className="flex flex-col items-center justify-center space-y-20">
@@ -34,6 +35,6 @@ function Index() {
 					alt="Background Blob"
 				/>
 			</div>
-		</>
+		</ThemeProvider>
 	);
 }
