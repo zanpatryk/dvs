@@ -1,13 +1,4 @@
 import {
-	Car,
-	FilePenLine,
-	LogOut,
-	Package,
-	ShieldCheck,
-	User,
-} from "lucide-react";
-
-import {
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
@@ -18,33 +9,21 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Clipboard, LogOut, Ticket, TriangleAlert } from "lucide-react";
 
 // Menu items.
+const urlBase = "/user-dashboard";
+
 const items = [
 	{
-		title: "Users",
-		url: "/users",
-		icon: User,
+		title: "Tickets",
+		url: "/tickets",
+		icon: Ticket,
 	},
 	{
-		title: "Models",
-		url: "/models",
-		icon: Package,
-	},
-	{
-		title: "Cars",
-		url: "/cars",
-		icon: Car,
-	},
-	{
-		title: "Rentals",
-		url: "/rentals",
-		icon: FilePenLine,
-	},
-	{
-		title: "Administrators",
-		url: "/administrators",
-		icon: ShieldCheck,
+		title: "Polls",
+		url: "/polls",
+		icon: Clipboard,
 	},
 ];
 
@@ -63,9 +42,9 @@ export function NavbarSidebar() {
 								<SidebarMenuItem key={item.title}>
 									<SidebarMenuButton
 										asChild
-										className="hover:bg-app-secondary hover:text-white font-medium text-lg [&>svg]:size-6"
+										className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5"
 									>
-										<a href={item.url}>
+										<a href={urlBase + item.url}>
 											<item.icon />
 											<span>{item.title}</span>
 										</a>
@@ -81,9 +60,10 @@ export function NavbarSidebar() {
 					<SidebarGroupContent>
 						<SidebarMenu>
 							<SidebarMenuItem>
-								<SidebarMenuButton
-									className="hover:bg-secondary hover:text-white font-medium text-lg [&>svg]:size-6"
-								>
+								<SidebarMenuButton className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5">
+									<TriangleAlert /> Report an issue
+								</SidebarMenuButton>
+								<SidebarMenuButton className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5">
 									<LogOut /> Log out
 								</SidebarMenuButton>
 							</SidebarMenuItem>
