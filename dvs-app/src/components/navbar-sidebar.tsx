@@ -10,9 +10,10 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Clipboard, LogOut, Ticket, TriangleAlert } from "lucide-react";
+import { useDisconnect } from "wagmi";
 
 // Menu items.
-const urlBase = "/user-dashboard";
+const urlBase = "/dashboard";
 
 const items = [
 	{
@@ -28,6 +29,8 @@ const items = [
 ];
 
 export function NavbarSidebar() {
+	const { disconnect } = useDisconnect();
+
 	return (
 		<Sidebar>
 			<SidebarHeader>
@@ -63,7 +66,10 @@ export function NavbarSidebar() {
 								<SidebarMenuButton className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5">
 									<TriangleAlert /> Report an issue
 								</SidebarMenuButton>
-								<SidebarMenuButton className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5">
+								<SidebarMenuButton
+									className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5"
+									onClick={() => disconnect()}
+								>
 									<LogOut /> Log out
 								</SidebarMenuButton>
 							</SidebarMenuItem>
