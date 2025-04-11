@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, LayoutGrid } from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 
 const Navbar = () => {
