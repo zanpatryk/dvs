@@ -28,7 +28,7 @@ export type Poll = {
 
 export const PollsData: Poll[] = [
 	{
-		id: "1",
+		id: "dccff95c-17db-4c95-9075-b9aa02f771f2",
 		title: "Poll #1",
 		description:
 			"Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis eius, praesentium quidem et, illo voluptates dolor voluptatum optio temporibus quia sapiente quae explicabo quos eligendi consequuntur omnis? Reiciendis, doloribus eos.",
@@ -36,28 +36,30 @@ export const PollsData: Poll[] = [
 		endDate: new Date(Date.now() + 1000 * 60 * 60 * 24),
 	},
 	{
-		id: "2",
+		id: "3200fb41-4490-412d-8f4c-7013eb4ebb86",
 		title: "Poll #2",
 		description:
 			"Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis eius, praesentium quidem et, illo voluptates dolor voluptatum optio temporibus quia sapiente quae explicabo quos eligendi consequuntur omnis? Reiciendis, doloribus eos.",
 		status: PollStatus.Voted,
-		endDate: new Date(Date.now() - 1000 * 60 * 60 * 24),
+		endDate: new Date(
+			Date.now() + 21 * 60 * 60 * 1000 + 37 * 60 * 1000 + 5 * 1000
+		),
 	},
 	{
-		id: "3",
+		id: "2da43472-04a5-472b-8fa6-3abc2aa8057d",
 		title: "Poll #3",
 		description:
 			"Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis eius, praesentium quidem et, illo voluptates dolor voluptatum optio temporibus quia sapiente quae explicabo quos eligendi consequuntur omnis? Reiciendis, doloribus eos.",
 		status: PollStatus.Finished,
-		endDate: new Date(Date.now() - 1000 * 60 * 60 * 24),
+		endDate: new Date(),
 	},
 	{
-		id: "4",
+		id: "b5e4ba83-4950-4cdc-95f6-d093ae36eec4",
 		title: "Poll #4",
 		description:
 			"Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis eius, praesentium quidem et, illo voluptates dolor voluptatum optio temporibus quia sapiente quae explicabo quos eligendi consequuntur omnis? Reiciendis, doloribus eos.",
 		status: PollStatus.Minted,
-		endDate: new Date(Date.now() - 1000 * 60 * 60 * 24),
+		endDate: new Date(),
 	},
 ];
 
