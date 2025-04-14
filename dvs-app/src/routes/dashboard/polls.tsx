@@ -14,6 +14,7 @@ import JoinPoll from "@/components/poll/join";
 import VotePoll from "@/components/poll/vote";
 import { PollsData, PollStatus, StatsData } from "@/dummy/data";
 import MintNFT from "@/components/poll/mint";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/dashboard/polls")({
 	component: RouteComponent,
@@ -46,28 +47,56 @@ interface PollCardProps {
 }
 
 function PollCard({ id, title, description, endDate, status }: PollCardProps) {
+	const [timeRemaining, setTimeRemaining] = useState({
+		days: 0,
+		hours: 0,
+		minutes: 0,
+		seconds: 0,
+	});
+
+	useEffect(() => {
+		const targetDate = endDate.getTime();
+		const interval = setInterval(() => {
+			const now = Date.now();
+			const distance = targetDate - now;
+			if (distance < 0) {
+				clearInterval(interval);
+				setTimeRemaining({
+					days: 0,
+					hours: 0,
+					minutes: 0,
+					seconds: 0,
+				});
+				return;
+			}
+			const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+			const hours = Math.floor(
+				(distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+			);
+			const minutes = Math.floor(
+				(distance % (1000 * 60 * 60)) / (1000 * 60)
+			);
+			const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+			setTimeRemaining({ days, hours, minutes, seconds });
+		}, 1000);
+		return () => clearInterval(interval);
+	}, [endDate]);
+
 	return (
 		<div className="bg-white rounded-lg p-6 shadow-sm">
 			<div className="mb-4">
 				<h3 className="text-lg font-medium">{title}</h3>
-				<p className="text-sm text-slate-500">{description}</p>
+				<p className="text-sm text-muted-foreground">{description}</p>
 			</div>
 
 			{endDate.getTime() > Date.now() && (
 				<div className="flex items-center text-sm text-slate-500 mb-4">
 					<Clock className="h-4 w-4 mr-2" />
-					<span>
-						Voting ends in:{" "}
-						{Math.floor(
-							(endDate.getTime() - Date.now()) / (1000 * 60 * 60)
-						)}{" "}
-						hours{" "}
-						{Math.floor(
-							((endDate.getTime() - Date.now()) / (1000 * 60)) %
-								60
-						)}{" "}
-						minutes
-					</span>
+					Voting ends in:{" "}
+					{timeRemaining.days > 0 && `${timeRemaining.days}d `}
+					{timeRemaining.hours > 0 && `${timeRemaining.hours}h `}
+					{timeRemaining.minutes > 0 && `${timeRemaining.minutes}m `}
+					{timeRemaining.seconds > 0 && `${timeRemaining.seconds}s`}
 				</div>
 			)}
 
@@ -88,7 +117,7 @@ function PollCard({ id, title, description, endDate, status }: PollCardProps) {
 									</DialogContent>
 								</Dialog>
 							);
-						case PollStatus.Complete:
+						case PollStatus.Voted:
 							return (
 								<Button
 									variant="outline"
@@ -98,7 +127,7 @@ function PollCard({ id, title, description, endDate, status }: PollCardProps) {
 									View Poll
 								</Button>
 							);
-						case PollStatus.Minted:
+						case PollStatus.Finished:
 							return (
 								<Dialog>
 									<DialogTrigger asChild>
@@ -112,7 +141,7 @@ function PollCard({ id, title, description, endDate, status }: PollCardProps) {
 									</DialogContent>
 								</Dialog>
 							);
-						case PollStatus.Results:
+						case PollStatus.Minted:
 							return (
 								<Button className="bg-green-500 hover:bg-green-600">
 									<View />
@@ -148,7 +177,7 @@ function RouteComponent() {
 					</DialogContent>
 				</Dialog>
 			</header>
-			<div className="flex-1 p-6">
+			<div className="flex-1 p-6 bg-gray-100">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 					{StatsData.map((stat) => (
 						<StatsCard
@@ -160,36 +189,17 @@ function RouteComponent() {
 							}
 						/>
 					))}
-					{/* <StatsCard
-						title="Total Polls"
-						value="69"
-						icon={<ClipboardList className="h-6 w-6" />}
-					/>
-					<StatsCard
-						title="Active Polls"
-						value="21"
-						icon={<Clock className="h-6 w-6" />}
-					/>
-					<StatsCard
-						title="Complete Polls"
-						value="37"
-						icon={<ClipboardCheck className="h-6 w-6" />}
-					/>
-					<StatsCard
-						title="Participation"
-						value="77 %"
-						icon={<Percent className="h-6 w-6" />}
-					/> */}
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					<div className="max-h-[calc(100vh-20rem)] overflow-y-auto">
-						<h2 className="sticky top-0 bg-white border-b text-xl font-medium text-muted-foreground pb-4">
+						<h2 className="sticky top-0 bg-gray-100 border-b text-xl font-medium text-muted-foreground pb-4">
 							Active Votes
 						</h2>
 						<div className="space-y-4">
 							{PollsData.map(
 								(poll) =>
-									poll.status != PollStatus.Minted && (
+									(poll.status === PollStatus.Voted ||
+										poll.status === PollStatus.Active) && (
 										<PollCard
 											key={poll.id}
 											id={poll.id}
@@ -200,137 +210,28 @@ function RouteComponent() {
 										/>
 									)
 							)}
-							{/* <PollCard
-								id="1"
-								isActive={true}
-								timeRemaining="21 hours 37 minutes"
-								actionButton={
-									<Dialog>
-										<DialogTrigger asChild>
-											<Button className="bg-blue-600 hover:bg-blue-700">
-												<CircleCheckBig />
-												Vote
-											</Button>
-										</DialogTrigger>
-										<DialogContent>
-											<VotePoll />
-										</DialogContent>
-									</Dialog>
-								}
-							/>
-							<PollCard
-								id="2"
-								isActive={true}
-								timeRemaining="21 hours 37 minutes"
-								actionButton={
-									<Button
-										variant="outline"
-										className="text-blue-600 border-blue-600"
-									>
-										<FileSearch />
-										View Poll
-									</Button>
-								}
-							/>
-							<PollCard
-								id="3"
-								isActive={true}
-								timeRemaining="21 hours 37 minutes"
-								actionButton={
-									<Button
-										variant="outline"
-										className="text-blue-600 border-blue-600"
-									>
-										<FileSearch />
-										View Poll
-									</Button>
-								}
-							/> */}
 						</div>
 					</div>
 					<div className="max-h-[calc(100vh-20rem)] overflow-y-auto">
-						<h2 className="sticky top-0 bg-white border-b text-xl font-medium text-muted-foreground pb-4">
+						<h2 className="sticky top-0 bg-gray-100 border-b text-xl font-medium text-muted-foreground pb-4">
 							Complete Votes
 						</h2>
 						<div className="space-y-4">
 							{PollsData.map(
 								(poll) =>
-									poll.status != PollStatus.Active && (
+									(poll.status === PollStatus.Minted ||
+										poll.status ===
+											PollStatus.Finished) && (
 										<PollCard
 											key={poll.id}
 											id={poll.id}
 											title={poll.title}
-											description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+											description={poll.description}
 											endDate={poll.endDate}
 											status={poll.status}
 										/>
 									)
 							)}
-							{/* <PollCard
-								id="4"
-								isActive={false}
-								actionButtons={[
-									<Button
-										key="view"
-										variant="outline"
-										className="text-blue-600 border-blue-600"
-									>
-										<FileSearch />
-										View Poll
-									</Button>,
-									<Button
-										key="results"
-										className="bg-green-500 hover:bg-green-600"
-									>
-										<View />
-										View Results
-									</Button>,
-								]}
-							/>
-							<PollCard
-								id="5"
-								isActive={false}
-								actionButtons={[
-									<Button
-										key="view"
-										variant="outline"
-										className="text-blue-600 border-blue-600"
-									>
-										<FileSearch />
-										View Poll
-									</Button>,
-									<Button
-										key="mint"
-										className="bg-green-500 hover:bg-green-600"
-									>
-										<Award />
-										Mint participation NFT
-									</Button>,
-								]}
-							/>
-							<PollCard
-								id="6"
-								isActive={false}
-								actionButtons={[
-									<Button
-										key="view"
-										variant="outline"
-										className="text-blue-600 border-blue-600"
-									>
-										<FileSearch />
-										View Poll
-									</Button>,
-									<Button
-										key="mint"
-										className="bg-green-500 hover:bg-green-600"
-									>
-										<span className="mr-2">
-											<Award />
-										</span>{" "}
-										Mint participation NFT
-									</Button>,
-								]}
-							/> */}
 						</div>
 					</div>
 				</div>

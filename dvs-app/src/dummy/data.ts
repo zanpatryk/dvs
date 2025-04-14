@@ -2,9 +2,9 @@ import { ClipboardCheck, ClipboardList, Clock, Percent } from "lucide-react";
 
 export enum PollStatus {
 	Active = "active",
-	Complete = "complete",
+	Voted = "voted",
+	Finished = "finished",
 	Minted = "minted",
-	Results = "results",
 }
 
 export const StatsData = [
@@ -40,7 +40,7 @@ export const PollsData: Poll[] = [
 		title: "Poll #2",
 		description:
 			"Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis eius, praesentium quidem et, illo voluptates dolor voluptatum optio temporibus quia sapiente quae explicabo quos eligendi consequuntur omnis? Reiciendis, doloribus eos.",
-		status: PollStatus.Complete,
+		status: PollStatus.Voted,
 		endDate: new Date(Date.now() - 1000 * 60 * 60 * 24),
 	},
 	{
@@ -48,7 +48,7 @@ export const PollsData: Poll[] = [
 		title: "Poll #3",
 		description:
 			"Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis eius, praesentium quidem et, illo voluptates dolor voluptatum optio temporibus quia sapiente quae explicabo quos eligendi consequuntur omnis? Reiciendis, doloribus eos.",
-		status: PollStatus.Minted,
+		status: PollStatus.Finished,
 		endDate: new Date(Date.now() - 1000 * 60 * 60 * 24),
 	},
 	{
@@ -56,7 +56,7 @@ export const PollsData: Poll[] = [
 		title: "Poll #4",
 		description:
 			"Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis eius, praesentium quidem et, illo voluptates dolor voluptatum optio temporibus quia sapiente quae explicabo quos eligendi consequuntur omnis? Reiciendis, doloribus eos.",
-		status: PollStatus.Results,
+		status: PollStatus.Minted,
 		endDate: new Date(Date.now() - 1000 * 60 * 60 * 24),
 	},
 ];
