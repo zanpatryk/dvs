@@ -23,11 +23,7 @@ const FormSchema = z.object({
 	}),
 });
 
-interface VotePollProps {
-	pollId: string;
-}
-
-const VotePoll = ({ pollId }: VotePollProps) => {
+const VotePoll = ({ pollId }: { pollId: string }) => {
 	const poll = PollsData.find((poll) => poll.id === pollId);
 
 	const form = useForm<z.infer<typeof FormSchema>>({
@@ -46,7 +42,7 @@ const VotePoll = ({ pollId }: VotePollProps) => {
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit(onSubmit)}
-				className="w-2/3 space-y-6"
+				className="space-y-6"
 			>
 				<FormField
 					control={form.control}
@@ -57,11 +53,7 @@ const VotePoll = ({ pollId }: VotePollProps) => {
 								{poll.title}
 							</FormLabel>
 							<FormDescription>
-								Lorem ipsum dolor sit, amet consectetur
-								adipisicing elit. Placeat, fugit! Nam cum nobis
-								accusantium quasi laborum explicabo neque
-								necessitatibus eaque? Neque aperiam enim hic
-								odio nihil nobis ab quia dolorum!
+								{poll.description}
 							</FormDescription>
 							<FormControl>
 								<RadioGroup

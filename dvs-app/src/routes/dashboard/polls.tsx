@@ -15,6 +15,8 @@ import VotePoll from "@/components/poll/vote";
 import { PollsData, PollStatus, StatsData } from "@/dummy/data";
 import MintNFT from "@/components/poll/mint";
 import { useEffect, useState } from "react";
+import ViewPoll from "@/components/poll/view";
+import ViewResults from "@/components/poll/results";
 
 export const Route = createFileRoute("/dashboard/polls")({
 	component: RouteComponent,
@@ -119,13 +121,20 @@ function PollCard({ id, title, description, endDate, status }: PollCardProps) {
 							);
 						case PollStatus.Voted:
 							return (
-								<Button
-									variant="outline"
-									className="text-blue-600 border-blue-600"
-								>
-									<FileSearch />
-									View Poll
-								</Button>
+								<Dialog>
+									<DialogTrigger asChild>
+										<Button
+											variant="outline"
+											className="text-blue-600 border-blue-600"
+										>
+											<FileSearch />
+											View Poll
+										</Button>
+									</DialogTrigger>
+									<DialogContent>
+										<ViewPoll pollId={id} />
+									</DialogContent>
+								</Dialog>
 							);
 						case PollStatus.Finished:
 							return (
@@ -137,16 +146,23 @@ function PollCard({ id, title, description, endDate, status }: PollCardProps) {
 										</Button>
 									</DialogTrigger>
 									<DialogContent>
-										<MintNFT />
+										<MintNFT pollId={id}/>
 									</DialogContent>
 								</Dialog>
 							);
 						case PollStatus.Minted:
 							return (
-								<Button className="bg-green-500 hover:bg-green-600">
-									<View />
-									View Results
-								</Button>
+								<Dialog>
+									<DialogTrigger asChild>
+										<Button className="bg-green-500 hover:bg-green-600">
+											<View />
+											View Results
+										</Button>
+									</DialogTrigger>
+									<DialogContent>
+										<ViewResults pollId={id} />
+									</DialogContent>
+								</Dialog>
 							);
 						default:
 							return null;
@@ -221,7 +237,7 @@ function RouteComponent() {
 								(poll) =>
 									(poll.status === PollStatus.Minted ||
 										poll.status ===
-											PollStatus.Finished) && (
+										PollStatus.Finished) && (
 										<PollCard
 											key={poll.id}
 											id={poll.id}
