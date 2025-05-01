@@ -15,7 +15,8 @@ import { Route as ContactImport } from './routes/contact'
 import { Route as AboutImport } from './routes/about'
 import { Route as DashboardRouteImport } from './routes/dashboard/route'
 import { Route as IndexImport } from './routes/index'
-import { Route as DashboardIndexImport } from './routes/dashboard/index'
+import { Route as DashboardTicketsImport } from './routes/dashboard/tickets'
+import { Route as DashboardPollsImport } from './routes/dashboard/polls'
 
 // Create/Update Routes
 
@@ -43,9 +44,15 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const DashboardIndexRoute = DashboardIndexImport.update({
-  id: '/',
-  path: '/',
+const DashboardTicketsRoute = DashboardTicketsImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+
+const DashboardPollsRoute = DashboardPollsImport.update({
+  id: '/polls',
+  path: '/polls',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 
@@ -81,11 +88,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactImport
       parentRoute: typeof rootRoute
     }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexImport
+    '/dashboard/polls': {
+      id: '/dashboard/polls'
+      path: '/polls'
+      fullPath: '/dashboard/polls'
+      preLoaderRoute: typeof DashboardPollsImport
+      parentRoute: typeof DashboardRouteImport
+    }
+    '/dashboard/tickets': {
+      id: '/dashboard/tickets'
+      path: '/tickets'
+      fullPath: '/dashboard/tickets'
+      preLoaderRoute: typeof DashboardTicketsImport
       parentRoute: typeof DashboardRouteImport
     }
   }
@@ -94,11 +108,13 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface DashboardRouteRouteChildren {
-  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardPollsRoute: typeof DashboardPollsRoute
+  DashboardTicketsRoute: typeof DashboardTicketsRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardPollsRoute: DashboardPollsRoute,
+  DashboardTicketsRoute: DashboardTicketsRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
@@ -110,14 +126,17 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/polls': typeof DashboardPollsRoute
+  '/dashboard/tickets': typeof DashboardTicketsRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/polls': typeof DashboardPollsRoute
+  '/dashboard/tickets': typeof DashboardTicketsRoute
 }
 
 export interface FileRoutesById {
@@ -126,15 +145,35 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/polls': typeof DashboardPollsRoute
+  '/dashboard/tickets': typeof DashboardTicketsRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/about' | '/contact' | '/dashboard/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/contact'
+    | '/dashboard/polls'
+    | '/dashboard/tickets'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/contact' | '/dashboard'
-  id: '__root__' | '/' | '/dashboard' | '/about' | '/contact' | '/dashboard/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/contact'
+    | '/dashboard/polls'
+    | '/dashboard/tickets'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/contact'
+    | '/dashboard/polls'
+    | '/dashboard/tickets'
   fileRoutesById: FileRoutesById
 }
 
@@ -174,7 +213,8 @@ export const routeTree = rootRoute
     "/dashboard": {
       "filePath": "dashboard/route.tsx",
       "children": [
-        "/dashboard/"
+        "/dashboard/polls",
+        "/dashboard/tickets"
       ]
     },
     "/about": {
@@ -183,8 +223,12 @@ export const routeTree = rootRoute
     "/contact": {
       "filePath": "contact.tsx"
     },
-    "/dashboard/": {
-      "filePath": "dashboard/index.tsx",
+    "/dashboard/polls": {
+      "filePath": "dashboard/polls.tsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/tickets": {
+      "filePath": "dashboard/tickets.tsx",
       "parent": "/dashboard"
     }
   }

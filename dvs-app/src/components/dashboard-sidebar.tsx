@@ -1,3 +1,5 @@
+import CreateTicket from "@/components/ticket/create";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
 	Sidebar,
 	SidebarContent,
@@ -9,6 +11,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Link } from "@tanstack/react-router";
 import { Clipboard, LogOut, Ticket, TriangleAlert } from "lucide-react";
 import { useDisconnect } from "wagmi";
 
@@ -47,10 +50,10 @@ export function DashboardSidebar() {
 										asChild
 										className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5"
 									>
-										<a href={urlBase + item.url}>
+										<Link to={urlBase + item.url}>
 											<item.icon />
 											<span>{item.title}</span>
-										</a>
+										</Link>
 									</SidebarMenuButton>
 								</SidebarMenuItem>
 							))}
@@ -63,9 +66,16 @@ export function DashboardSidebar() {
 					<SidebarGroupContent>
 						<SidebarMenu>
 							<SidebarMenuItem>
-								<SidebarMenuButton className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5">
-									<TriangleAlert /> Report an issue
-								</SidebarMenuButton>
+								<Dialog>
+									<DialogTrigger asChild>
+										<SidebarMenuButton className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5">
+											<TriangleAlert /> Report an issue
+										</SidebarMenuButton>
+									</DialogTrigger>
+									<DialogContent>
+										<CreateTicket />
+									</DialogContent>
+								</Dialog>
 								<SidebarMenuButton
 									className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5"
 									onClick={() => disconnect()}

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/input-otp";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { DialogClose } from "@/components/ui/dialog";
+import { CirclePlus } from "lucide-react";
 
 const FormSchema = z.object({
 	code: z.string().min(6, {
@@ -80,14 +81,19 @@ const JoinPoll = () => {
 					<DialogClose>
 						<Button
 							type="submit"
-							className="bg-blue-600 hover:bg-blue-700"
+							className="bg-green-500 hover:bg-green-600"
 						>
-							Submit
+							<CirclePlus />
+							Vote
 						</Button>
 					</DialogClose>
 				) : (
-					<Button className="bg-blue-600 hover:bg-blue-700" disabled>
-						Submit
+					<Button
+						className="bg-green-500 hover:bg-green-600"
+						disabled
+					>
+						<CirclePlus />
+						Vote
 					</Button>
 				)}
 			</form>
