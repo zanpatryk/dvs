@@ -4,7 +4,9 @@
 
 Smart contracts: Solidity, Foundry ( framework )
 
-Front-end: Next.js, Tailwind
+Front-end: React, Vite, Tailwind
+
+Back-end: Hono, bun
 
 Database: NeonDB, PostgreSQL, DrizzleORM
 
@@ -29,4 +31,5 @@ Excel
 ## Roles
 
 SC - Patryk
+BE - Jerzy
 FE - Jerzy, Mateusz, Michał
