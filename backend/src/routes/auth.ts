@@ -8,7 +8,7 @@ import { noncesTable } from "../db/schema/nonces";
 import { and, eq } from "drizzle-orm";
 import { sessionsTable } from "../db/schema/sessions";
 import { refreshTokensTable } from "../db/schema/refresh-tokens";
-import { sign, verify } from "hono/jwt";
+import { sign, verify, type JwtVariables } from "hono/jwt";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { CookieOptions } from "hono/utils/cookie";
 
@@ -46,7 +46,14 @@ const JwtPayloadSchema = z.object(
 
 export type JwtPayload = z.infer<typeof JwtPayloadSchema>;
 
-export const authRoute = new Hono()
+export type Variables = JwtVariables<JwtPayload>;
+
+export const meRoute = new Hono<{ Variables: Variables }>().get("/", (c) => {
+	const payload = c.get("jwtPayload");
+	return c.json({ address: payload.sub });
+});
+
+export const authRoute = new Hono<{ Variables: Variables }>()
 	.get("/nonce/:address", async (c) => {
 		const result = addressSchema.safeParse(c.req.param("address"));
 		if (!result.success) {
@@ -259,7 +266,8 @@ export const authRoute = new Hono()
 		return c.json({ message: "Tokens refreshed" }, 201);
 	})
 	.post("/logout", async (c) => {
-		const refreshToken = getCookie(c, "refresh_token", "host");
+		const refreshToken = getCookie(c, "refresh_token");
+		// const refreshToken = getCookie(c, "refresh_token", "host");
 		if (refreshToken) {
 			try {
 				const payload = await verify(
@@ -282,8 +290,10 @@ export const authRoute = new Hono()
 			}
 		}
 		// Clear cookies (HttpOnly cookies set earlier)
-		deleteCookie(c, "access_token", { prefix: "host", path: "/" });
-		deleteCookie(c, "refresh_token", { prefix: "host", path: "/" });
+		deleteCookie(c, "access_token", { path: "/" });
+		deleteCookie(c, "refresh_token", { path: "/" });
+		// deleteCookie(c, "access_token", { prefix: "host", path: "/" });
+		// deleteCookie(c, "refresh_token", { prefix: "host", path: "/" });
 
 		return c.json({ message: "Logged out" }, 201);
 	});

@@ -1,12 +1,19 @@
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
+import { useMetaMask } from "@/hooks/use-meta-mask";
 import { Link } from "@tanstack/react-router";
 import { LayoutGrid } from "lucide-react";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
 
 const Navbar = () => {
-	const { address } = useAccount();
-	const { connectors, connect } = useConnect();
-	const { disconnect } = useDisconnect();
+	const { login, logout } = useMetaMask();
+	const { data, isPending, error } = useAuth();
+
+	if (isPending) return <Skeleton className="h-4" />;
+	if (error) {
+		return <div>Error: {error.message}</div>;
+	}
+
 	return (
 		<nav className="flex justify-evenly items-center h-24 p-4 backdrop-blur-sm">
 			<img src="/dvs.svg" alt="Logo" className="h-full" />
@@ -19,17 +26,17 @@ const Navbar = () => {
 			<Link to="/contact" className="text-2xl font-bold">
 				Contact
 			</Link>
-			{address ? (
+			{data?.address ? (
 				<>
 					<Button
 						className="hover:text-orange-500 transition-color duration-300"
 						onClick={() => {
-							disconnect();
+							logout();
 						}}
 					>
 						Disconnect
 					</Button>
-					<Link to="/dashboard">
+					<Link to="/dashboard/polls">
 						<Button size="icon">
 							<LayoutGrid />
 						</Button>
@@ -39,7 +46,7 @@ const Navbar = () => {
 				<Button
 					className="hover:text-orange-500 transition-color duration-300"
 					onClick={() => {
-						connect({ connector: connectors[0] });
+						login();
 					}}
 				>
 					<img
