@@ -11,206 +11,241 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as TestImport } from './routes/test'
-import { Route as ContactImport } from './routes/contact'
-import { Route as AboutImport } from './routes/about'
-import { Route as DashboardRouteImport } from './routes/dashboard/route'
-import { Route as IndexImport } from './routes/index'
-import { Route as DashboardTicketsImport } from './routes/dashboard/tickets'
-import { Route as DashboardPollsImport } from './routes/dashboard/polls'
+import { Route as IndexImport } from './routes/_index'
+import { Route as AuthenticatedImport } from './routes/_authenticated'
+import { Route as IndexIndexImport } from './routes/_index/index'
+import { Route as IndexContactImport } from './routes/_index/contact'
+import { Route as IndexAboutImport } from './routes/_index/about'
+import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/_dashboard'
+import { Route as AuthenticatedDashboardDashboardTicketsImport } from './routes/_authenticated/_dashboard/dashboard/tickets'
+import { Route as AuthenticatedDashboardDashboardPollsImport } from './routes/_authenticated/_dashboard/dashboard/polls'
 
 // Create/Update Routes
 
-const TestRoute = TestImport.update({
-  id: '/test',
-  path: '/test',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ContactRoute = ContactImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AboutRoute = AboutImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const DashboardRouteRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const IndexRoute = IndexImport.update({
+  id: '/_index',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AuthenticatedRoute = AuthenticatedImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const IndexIndexRoute = IndexIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => IndexRoute,
 } as any)
 
-const DashboardTicketsRoute = DashboardTicketsImport.update({
-  id: '/tickets',
-  path: '/tickets',
-  getParentRoute: () => DashboardRouteRoute,
+const IndexContactRoute = IndexContactImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => IndexRoute,
 } as any)
 
-const DashboardPollsRoute = DashboardPollsImport.update({
-  id: '/polls',
-  path: '/polls',
-  getParentRoute: () => DashboardRouteRoute,
+const IndexAboutRoute = IndexAboutImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => IndexRoute,
 } as any)
+
+const AuthenticatedDashboardRoute = AuthenticatedDashboardImport.update({
+  id: '/_dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedDashboardDashboardTicketsRoute =
+  AuthenticatedDashboardDashboardTicketsImport.update({
+    id: '/dashboard/tickets',
+    path: '/dashboard/tickets',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardPollsRoute =
+  AuthenticatedDashboardDashboardPollsImport.update({
+    id: '/dashboard/polls',
+    path: '/dashboard/polls',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedImport
+      parentRoute: typeof rootRoute
+    }
+    '/_index': {
+      id: '/_index'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRoute
+    '/_authenticated/_dashboard': {
+      id: '/_authenticated/_dashboard'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedDashboardImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/about': {
-      id: '/about'
+    '/_index/about': {
+      id: '/_index/about'
       path: '/about'
       fullPath: '/about'
-      preLoaderRoute: typeof AboutImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof IndexAboutImport
+      parentRoute: typeof IndexImport
     }
-    '/contact': {
-      id: '/contact'
+    '/_index/contact': {
+      id: '/_index/contact'
       path: '/contact'
       fullPath: '/contact'
-      preLoaderRoute: typeof ContactImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof IndexContactImport
+      parentRoute: typeof IndexImport
     }
-    '/test': {
-      id: '/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof TestImport
-      parentRoute: typeof rootRoute
+    '/_index/': {
+      id: '/_index/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexIndexImport
+      parentRoute: typeof IndexImport
     }
-    '/dashboard/polls': {
-      id: '/dashboard/polls'
-      path: '/polls'
+    '/_authenticated/_dashboard/dashboard/polls': {
+      id: '/_authenticated/_dashboard/dashboard/polls'
+      path: '/dashboard/polls'
       fullPath: '/dashboard/polls'
-      preLoaderRoute: typeof DashboardPollsImport
-      parentRoute: typeof DashboardRouteImport
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardPollsImport
+      parentRoute: typeof AuthenticatedDashboardImport
     }
-    '/dashboard/tickets': {
-      id: '/dashboard/tickets'
-      path: '/tickets'
+    '/_authenticated/_dashboard/dashboard/tickets': {
+      id: '/_authenticated/_dashboard/dashboard/tickets'
+      path: '/dashboard/tickets'
       fullPath: '/dashboard/tickets'
-      preLoaderRoute: typeof DashboardTicketsImport
-      parentRoute: typeof DashboardRouteImport
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardTicketsImport
+      parentRoute: typeof AuthenticatedDashboardImport
     }
   }
 }
 
 // Create and export the route tree
 
-interface DashboardRouteRouteChildren {
-  DashboardPollsRoute: typeof DashboardPollsRoute
-  DashboardTicketsRoute: typeof DashboardTicketsRoute
+interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardDashboardPollsRoute: typeof AuthenticatedDashboardDashboardPollsRoute
+  AuthenticatedDashboardDashboardTicketsRoute: typeof AuthenticatedDashboardDashboardTicketsRoute
 }
 
-const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-  DashboardPollsRoute: DashboardPollsRoute,
-  DashboardTicketsRoute: DashboardTicketsRoute,
+const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
+  {
+    AuthenticatedDashboardDashboardPollsRoute:
+      AuthenticatedDashboardDashboardPollsRoute,
+    AuthenticatedDashboardDashboardTicketsRoute:
+      AuthenticatedDashboardDashboardTicketsRoute,
+  }
+
+const AuthenticatedDashboardRouteWithChildren =
+  AuthenticatedDashboardRoute._addFileChildren(
+    AuthenticatedDashboardRouteChildren,
+  )
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
 }
 
-const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
-  DashboardRouteRouteChildren,
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
 )
 
+interface IndexRouteChildren {
+  IndexAboutRoute: typeof IndexAboutRoute
+  IndexContactRoute: typeof IndexContactRoute
+  IndexIndexRoute: typeof IndexIndexRoute
+}
+
+const IndexRouteChildren: IndexRouteChildren = {
+  IndexAboutRoute: IndexAboutRoute,
+  IndexContactRoute: IndexContactRoute,
+  IndexIndexRoute: IndexIndexRoute,
+}
+
+const IndexRouteWithChildren = IndexRoute._addFileChildren(IndexRouteChildren)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteRouteWithChildren
-  '/about': typeof AboutRoute
-  '/contact': typeof ContactRoute
-  '/test': typeof TestRoute
-  '/dashboard/polls': typeof DashboardPollsRoute
-  '/dashboard/tickets': typeof DashboardTicketsRoute
+  '': typeof AuthenticatedDashboardRouteWithChildren
+  '/about': typeof IndexAboutRoute
+  '/contact': typeof IndexContactRoute
+  '/': typeof IndexIndexRoute
+  '/dashboard/polls': typeof AuthenticatedDashboardDashboardPollsRoute
+  '/dashboard/tickets': typeof AuthenticatedDashboardDashboardTicketsRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteRouteWithChildren
-  '/about': typeof AboutRoute
-  '/contact': typeof ContactRoute
-  '/test': typeof TestRoute
-  '/dashboard/polls': typeof DashboardPollsRoute
-  '/dashboard/tickets': typeof DashboardTicketsRoute
+  '': typeof AuthenticatedDashboardRouteWithChildren
+  '/about': typeof IndexAboutRoute
+  '/contact': typeof IndexContactRoute
+  '/': typeof IndexIndexRoute
+  '/dashboard/polls': typeof AuthenticatedDashboardDashboardPollsRoute
+  '/dashboard/tickets': typeof AuthenticatedDashboardDashboardTicketsRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteRouteWithChildren
-  '/about': typeof AboutRoute
-  '/contact': typeof ContactRoute
-  '/test': typeof TestRoute
-  '/dashboard/polls': typeof DashboardPollsRoute
-  '/dashboard/tickets': typeof DashboardTicketsRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_index': typeof IndexRouteWithChildren
+  '/_authenticated/_dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_index/about': typeof IndexAboutRoute
+  '/_index/contact': typeof IndexContactRoute
+  '/_index/': typeof IndexIndexRoute
+  '/_authenticated/_dashboard/dashboard/polls': typeof AuthenticatedDashboardDashboardPollsRoute
+  '/_authenticated/_dashboard/dashboard/tickets': typeof AuthenticatedDashboardDashboardTicketsRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/dashboard'
+    | ''
     | '/about'
     | '/contact'
-    | '/test'
+    | '/'
     | '/dashboard/polls'
     | '/dashboard/tickets'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/dashboard'
+    | ''
     | '/about'
     | '/contact'
-    | '/test'
+    | '/'
     | '/dashboard/polls'
     | '/dashboard/tickets'
   id:
     | '__root__'
-    | '/'
-    | '/dashboard'
-    | '/about'
-    | '/contact'
-    | '/test'
-    | '/dashboard/polls'
-    | '/dashboard/tickets'
+    | '/_authenticated'
+    | '/_index'
+    | '/_authenticated/_dashboard'
+    | '/_index/about'
+    | '/_index/contact'
+    | '/_index/'
+    | '/_authenticated/_dashboard/dashboard/polls'
+    | '/_authenticated/_dashboard/dashboard/tickets'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
-  AboutRoute: typeof AboutRoute
-  ContactRoute: typeof ContactRoute
-  TestRoute: typeof TestRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  IndexRoute: typeof IndexRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  DashboardRouteRoute: DashboardRouteRouteWithChildren,
-  AboutRoute: AboutRoute,
-  ContactRoute: ContactRoute,
-  TestRoute: TestRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  IndexRoute: IndexRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -223,39 +258,51 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
-        "/dashboard",
-        "/about",
-        "/contact",
-        "/test"
+        "/_authenticated",
+        "/_index"
       ]
     },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/dashboard": {
-      "filePath": "dashboard/route.tsx",
+    "/_authenticated": {
+      "filePath": "_authenticated.tsx",
       "children": [
-        "/dashboard/polls",
-        "/dashboard/tickets"
+        "/_authenticated/_dashboard"
       ]
     },
-    "/about": {
-      "filePath": "about.tsx"
+    "/_index": {
+      "filePath": "_index.tsx",
+      "children": [
+        "/_index/about",
+        "/_index/contact",
+        "/_index/"
+      ]
     },
-    "/contact": {
-      "filePath": "contact.tsx"
+    "/_authenticated/_dashboard": {
+      "filePath": "_authenticated/_dashboard.tsx",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/_dashboard/dashboard/polls",
+        "/_authenticated/_dashboard/dashboard/tickets"
+      ]
     },
-    "/test": {
-      "filePath": "test.tsx"
+    "/_index/about": {
+      "filePath": "_index/about.tsx",
+      "parent": "/_index"
     },
-    "/dashboard/polls": {
-      "filePath": "dashboard/polls.tsx",
-      "parent": "/dashboard"
+    "/_index/contact": {
+      "filePath": "_index/contact.tsx",
+      "parent": "/_index"
     },
-    "/dashboard/tickets": {
-      "filePath": "dashboard/tickets.tsx",
-      "parent": "/dashboard"
+    "/_index/": {
+      "filePath": "_index/index.tsx",
+      "parent": "/_index"
+    },
+    "/_authenticated/_dashboard/dashboard/polls": {
+      "filePath": "_authenticated/_dashboard/dashboard/polls.tsx",
+      "parent": "/_authenticated/_dashboard"
+    },
+    "/_authenticated/_dashboard/dashboard/tickets": {
+      "filePath": "_authenticated/_dashboard/dashboard/tickets.tsx",
+      "parent": "/_authenticated/_dashboard"
     }
   }
 }

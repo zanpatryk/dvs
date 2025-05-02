@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 import ViewPoll from "@/components/poll/view";
 import ViewResults from "@/components/poll/results";
 
-export const Route = createFileRoute("/dashboard/polls")({
+export const Route = createFileRoute("/_authenticated/_dashboard/dashboard/polls")({
 	component: RouteComponent,
 });
 

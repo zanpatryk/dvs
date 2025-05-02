@@ -3,8 +3,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/_authenticated/_dashboard")({
 	component: RouteComponent,
+	notFoundComponent: () => {},
 });
 
 function RouteComponent() {

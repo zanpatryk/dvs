@@ -1,14 +1,13 @@
 import { StrictMode } from "react";
-import "./routes/css/index.css";
+import "@/index.css";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { http, WagmiProvider, createConfig } from "wagmi";
-import { sepolia } from "wagmi/chains";
-import { metaMask } from "wagmi/connectors";
 import { routeTree } from "./routeTree.gen";
 
-const router = createRouter({ routeTree });
+const queryClient = new QueryClient();
+
+const router = createRouter({ routeTree, context: { queryClient } });
 
 declare module "@tanstack/react-router" {
 	interface Register {
@@ -16,27 +15,22 @@ declare module "@tanstack/react-router" {
 	}
 }
 
-// MetaMask
-const config = createConfig({
-	chains: [sepolia],
-	connectors: [metaMask()],
-	transports: {
-		[sepolia.id]: http(),
-	},
-});
-
-const client = new QueryClient();
+// const config = createConfig({
+// 	chains: [sepolia],
+// 	connectors: [metaMask()],
+// 	transports: {
+// 		[sepolia.id]: http(),
+// 	},
+// });
 
 const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
 	const root = ReactDOM.createRoot(rootElement);
 	root.render(
 		<StrictMode>
-			<WagmiProvider config={config}>
-				<QueryClientProvider client={client}>
-					<RouterProvider router={router} />
-				</QueryClientProvider>
-			</WagmiProvider>
+			<QueryClientProvider client={queryClient}>
+				<RouterProvider router={router} />
+			</QueryClientProvider>
 		</StrictMode>
 	);
 }

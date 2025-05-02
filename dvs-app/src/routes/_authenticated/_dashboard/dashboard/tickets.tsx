@@ -1,11 +1,13 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { StatsData, TicketsData } from "@/dummy/data";
-import { StatsCard } from "@/routes/dashboard/polls";
+import { StatsCard } from "@/routes/_authenticated/_dashboard/dashboard/polls";
 import { columns } from "@/tickets/columns";
 import { DataTable } from "@/tickets/data-table";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/dashboard/tickets")({
+export const Route = createFileRoute(
+	"/_authenticated/_dashboard/dashboard/tickets"
+)({
 	component: RouteComponent,
 });
 

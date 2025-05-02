@@ -11,9 +11,9 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useMetaMask } from "@/hooks/use-meta-mask";
 import { Link } from "@tanstack/react-router";
 import { Clipboard, LogOut, Ticket, TriangleAlert } from "lucide-react";
-import { useDisconnect } from "wagmi";
 
 // Menu items.
 const urlBase = "/dashboard";
@@ -32,7 +32,7 @@ const items = [
 ];
 
 export function DashboardSidebar() {
-	const { disconnect } = useDisconnect();
+	const { logout } = useMetaMask();
 
 	return (
 		<Sidebar>
@@ -78,7 +78,7 @@ export function DashboardSidebar() {
 								</Dialog>
 								<SidebarMenuButton
 									className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5"
-									onClick={() => disconnect()}
+									onClick={() => logout()}
 								>
 									<LogOut /> Log out
 								</SidebarMenuButton>
