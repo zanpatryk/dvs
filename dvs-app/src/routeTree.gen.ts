@@ -11,6 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as TestImport } from './routes/test'
 import { Route as ContactImport } from './routes/contact'
 import { Route as AboutImport } from './routes/about'
 import { Route as DashboardRouteImport } from './routes/dashboard/route'
@@ -19,6 +20,12 @@ import { Route as DashboardTicketsImport } from './routes/dashboard/tickets'
 import { Route as DashboardPollsImport } from './routes/dashboard/polls'
 
 // Create/Update Routes
+
+const TestRoute = TestImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const ContactRoute = ContactImport.update({
   id: '/contact',
@@ -88,6 +95,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactImport
       parentRoute: typeof rootRoute
     }
+    '/test': {
+      id: '/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestImport
+      parentRoute: typeof rootRoute
+    }
     '/dashboard/polls': {
       id: '/dashboard/polls'
       path: '/polls'
@@ -126,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/test': typeof TestRoute
   '/dashboard/polls': typeof DashboardPollsRoute
   '/dashboard/tickets': typeof DashboardTicketsRoute
 }
@@ -135,6 +150,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/test': typeof TestRoute
   '/dashboard/polls': typeof DashboardPollsRoute
   '/dashboard/tickets': typeof DashboardTicketsRoute
 }
@@ -145,6 +161,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/test': typeof TestRoute
   '/dashboard/polls': typeof DashboardPollsRoute
   '/dashboard/tickets': typeof DashboardTicketsRoute
 }
@@ -156,6 +173,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/about'
     | '/contact'
+    | '/test'
     | '/dashboard/polls'
     | '/dashboard/tickets'
   fileRoutesByTo: FileRoutesByTo
@@ -164,6 +182,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/about'
     | '/contact'
+    | '/test'
     | '/dashboard/polls'
     | '/dashboard/tickets'
   id:
@@ -172,6 +191,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/about'
     | '/contact'
+    | '/test'
     | '/dashboard/polls'
     | '/dashboard/tickets'
   fileRoutesById: FileRoutesById
@@ -182,6 +202,7 @@ export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  TestRoute: typeof TestRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -189,6 +210,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  TestRoute: TestRoute,
 }
 
 export const routeTree = rootRoute
@@ -204,7 +226,8 @@ export const routeTree = rootRoute
         "/",
         "/dashboard",
         "/about",
-        "/contact"
+        "/contact",
+        "/test"
       ]
     },
     "/": {
@@ -222,6 +245,9 @@ export const routeTree = rootRoute
     },
     "/contact": {
       "filePath": "contact.tsx"
+    },
+    "/test": {
+      "filePath": "test.tsx"
     },
     "/dashboard/polls": {
       "filePath": "dashboard/polls.tsx",
