@@ -15,7 +15,9 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DialogClose } from "@/components/ui/dialog";
 import { CircleCheckBig } from "lucide-react";
-import { PollsData } from "@/dummy/data";
+import { useQuery } from "@tanstack/react-query";
+import { client } from "@/hono-client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const FormSchema = z.object({
 	type: z.enum(["1", "2", "3"], {
@@ -23,8 +25,26 @@ const FormSchema = z.object({
 	}),
 });
 
+async function getPoll(pollId: string) {
+	const res = await client.api.polls[":id"].$get({
+		param: {
+			id: pollId,
+		},
+	});
+
+	if (!res.ok) throw new Error("Not found");
+
+	return await res.json();
+}
+
 const VotePoll = ({ pollId }: { pollId: string }) => {
-	const poll = PollsData.find((poll) => poll.id === pollId);
+	// const poll = PollsData.find((poll) => poll.id === pollId);
+	const { isPending, error, data } = useQuery({
+		queryKey: ["get-poll"],
+		queryFn: async () => {
+			return getPoll(pollId);
+		},
+	});
 
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
@@ -34,26 +54,27 @@ const VotePoll = ({ pollId }: { pollId: string }) => {
 		console.log(JSON.stringify(data, null, 2));
 	}
 
-	if (!poll) {
+	if (error) {
 		return <div>Poll not found</div>;
+	}
+
+	if (isPending) {
+		return <Skeleton className="h-4" />;
 	}
 
 	return (
 		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className="space-y-6"
-			>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 				<FormField
 					control={form.control}
 					name="type"
 					render={({ field }) => (
 						<FormItem className="space-y-3">
 							<FormLabel className="text-2xl font-bold">
-								{poll.title}
+								{data.poll.title}
 							</FormLabel>
 							<FormDescription>
-								{poll.description}
+								{data.poll.description}
 							</FormDescription>
 							<FormControl>
 								<RadioGroup

@@ -12,13 +12,18 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import JoinPoll from "@/components/poll/join";
 import VotePoll from "@/components/poll/vote";
-import { PollsData, PollStatus, StatsData } from "@/dummy/data";
+import { StatsData } from "@/dummy/data";
 import MintNFT from "@/components/poll/mint";
 import { useEffect, useState } from "react";
 import ViewPoll from "@/components/poll/view";
 import ViewResults from "@/components/poll/results";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { client } from "@/hono-client";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export const Route = createFileRoute("/_authenticated/_dashboard/dashboard/polls")({
+export const Route = createFileRoute(
+	"/_authenticated/_dashboard/dashboard/polls"
+)({
 	component: RouteComponent,
 });
 
@@ -44,11 +49,10 @@ interface PollCardProps {
 	id: string;
 	title: string;
 	description: string;
-	endDate: Date;
-	status: PollStatus;
+	endDate?: Date;
 }
 
-function PollCard({ id, title, description, endDate, status }: PollCardProps) {
+function PollCard({ id, title, description, endDate }: PollCardProps) {
 	const [timeRemaining, setTimeRemaining] = useState({
 		days: 0,
 		hours: 0,
@@ -57,7 +61,9 @@ function PollCard({ id, title, description, endDate, status }: PollCardProps) {
 	});
 
 	useEffect(() => {
-		const targetDate = endDate.getTime();
+		const targetDate = (
+			endDate ?? new Date(Date.now() - 60 * 1000)
+		).getTime();
 		const interval = setInterval(() => {
 			const now = Date.now();
 			const distance = targetDate - now;
@@ -91,7 +97,7 @@ function PollCard({ id, title, description, endDate, status }: PollCardProps) {
 				<p className="text-sm text-muted-foreground">{description}</p>
 			</div>
 
-			{endDate.getTime() > Date.now() && (
+			{endDate && endDate.getTime() > Date.now() && (
 				<div className="flex items-center text-sm text-slate-500 mb-4">
 					<Clock className="h-4 w-4 mr-2" />
 					Voting ends in:{" "}
@@ -103,7 +109,18 @@ function PollCard({ id, title, description, endDate, status }: PollCardProps) {
 			)}
 
 			<div className="flex justify-end space-x-2">
-				{(() => {
+				<Dialog>
+					<DialogTrigger asChild>
+						<Button className="bg-blue-600 hover:bg-blue-700">
+							<CircleCheckBig />
+							Vote
+						</Button>
+					</DialogTrigger>
+					<DialogContent>
+						<VotePoll pollId={id} />
+					</DialogContent>
+				</Dialog>
+				{/* {(() => {
 					switch (status) {
 						case PollStatus.Active:
 							return (
@@ -146,7 +163,7 @@ function PollCard({ id, title, description, endDate, status }: PollCardProps) {
 										</Button>
 									</DialogTrigger>
 									<DialogContent>
-										<MintNFT pollId={id}/>
+										<MintNFT pollId={id} />
 									</DialogContent>
 								</Dialog>
 							);
@@ -167,13 +184,39 @@ function PollCard({ id, title, description, endDate, status }: PollCardProps) {
 						default:
 							return null;
 					}
-				})()}
+				})()} */}
 			</div>
 		</div>
 	);
 }
 
+async function getPolls() {
+	let res = await client.api.polls.$get();
+	if (!res.ok) {
+		if (res.status === 401) {
+			const refresh = await client.auth.refresh.$post();
+			if (!refresh.ok) throw new Error("Refresh failed");
+			// retry original
+			res = await client.api.polls.$get();
+			if (!res.ok) throw new Error(`${res.status}`);
+		} else throw new Error(`${res.status}`);
+	}
+	return await res.json();
+}
+
+const pollsQueryOptions = queryOptions({
+	queryKey: ["get-polls"],
+	queryFn: getPolls,
+	staleTime: 5 * 60 * 1000,
+});
+
 function RouteComponent() {
+	const { isPending, error, data } = useQuery(pollsQueryOptions);
+
+	if (error) {
+		return <div>Error: {error.message}</div>;
+	}
+
 	return (
 		<>
 			<header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
@@ -212,19 +255,22 @@ function RouteComponent() {
 							Active Votes
 						</h2>
 						<div className="space-y-4">
-							{PollsData.map(
-								(poll) =>
-									(poll.status === PollStatus.Voted ||
-										poll.status === PollStatus.Active) && (
-										<PollCard
-											key={poll.id}
-											id={poll.id}
-											title={poll.title}
-											description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-											endDate={poll.endDate}
-											status={poll.status}
-										/>
-									)
+							{isPending ? (
+								<Skeleton className="h-4" />
+							) : (
+								data.map((poll) => (
+									<PollCard
+										key={poll.id}
+										id={poll.id}
+										title={poll.title}
+										description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+										endDate={
+											poll.endTime
+												? new Date(poll.endTime)
+												: undefined
+										}
+									/>
+								))
 							)}
 						</div>
 					</div>
@@ -233,11 +279,12 @@ function RouteComponent() {
 							Complete Votes
 						</h2>
 						<div className="space-y-4">
-							{PollsData.map(
+							<Skeleton className="h-4" />
+							{/* {PollsData.map(
 								(poll) =>
 									(poll.status === PollStatus.Minted ||
 										poll.status ===
-										PollStatus.Finished) && (
+											PollStatus.Finished) && (
 										<PollCard
 											key={poll.id}
 											id={poll.id}
@@ -247,7 +294,7 @@ function RouteComponent() {
 											status={poll.status}
 										/>
 									)
-							)}
+							)} */}
 						</div>
 					</div>
 				</div>

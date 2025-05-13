@@ -3,8 +3,9 @@ import { serveStatic } from "hono/bun";
 import { logger } from "hono/logger";
 import { healthRoute } from "./routes/health";
 import { ticketsRoute } from "./routes/tickets";
-import { authRoute, meRoute, type JwtPayload } from "./routes/auth";
+import { authRoute, meRoute } from "./routes/auth";
 import { jwt } from "hono/jwt";
+import { pollsRoute } from "./routes/polls";
 
 const app = new Hono();
 
@@ -22,7 +23,8 @@ const apiRoutes = app
 	.route("/health", healthRoute)
 	.basePath("/api")
 	.route("/me", meRoute)
-	.route("/tickets", ticketsRoute);
+	.route("/tickets", ticketsRoute)
+	.route("/polls", pollsRoute);
 app.get("*", serveStatic({ root: "../../dvs-app/dist" }));
 app.get("*", serveStatic({ path: "../../dvs-app/dist/index.html" }));
 

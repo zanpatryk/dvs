@@ -12,7 +12,7 @@ import { sign, verify, type JwtVariables } from "hono/jwt";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { CookieOptions } from "hono/utils/cookie";
 
-const ACCESS_TOKEN_EXP = 15 * 60; // 15 minutes
+const ACCESS_TOKEN_EXP = 5 * 60; // 5 minutes
 const REFRESH_TOKEN_EXP = 7 * 24 * 3600; // 7 days
 const NONCE_EXP = 60 * 60 * 1000;
 const COOKIE_OPTIONS: CookieOptions = {
@@ -173,7 +173,7 @@ export const authRoute = new Hono<{ Variables: Variables }>()
 			maxAge: REFRESH_TOKEN_EXP,
 		});
 
-		// 6) Rotate nonce to a new value (invalidate old signature):contentReference[oaicite:15]{index=15}
+		// 6) Rotate nonce to a new value (invalidate old signature)
 		const newNonce = uuid();
 		const newExpiry = new Date(Date.now() + NONCE_EXP);
 		await db
@@ -186,7 +186,7 @@ export const authRoute = new Hono<{ Variables: Variables }>()
 	.post("/refresh", async (c) => {
 		// 1) Read refresh token from cookie
 		// const refreshToken = getCookie(c, "refresh_token", "host"); // __Host-refresh_token cookie
-		const refreshToken = getCookie(c, "refresh_token"); // __Host-refresh_token cookie
+		const refreshToken = getCookie(c, "refresh_token");
 		if (!refreshToken) {
 			return c.json({ error: "Refresh token missing" }, 401);
 		}
@@ -253,7 +253,7 @@ export const authRoute = new Hono<{ Variables: Variables }>()
 			process.env.JWT_SECRET!
 		);
 
-		// 7) Overwrite cookies (rotate tokens):contentReference[oaicite:19]{index=19}
+		// 7) Overwrite cookies
 		setCookie(c, "access_token", newAccessToken, {
 			...COOKIE_OPTIONS,
 			maxAge: ACCESS_TOKEN_EXP,

@@ -6,6 +6,16 @@ export const Route = createFileRoute("/_authenticated")({
 	beforeLoad: async ({ context }) => {
 		const queryClient = context.queryClient;
 
+		// TODO: hit /refresh endpoint if failed the first time
+		// const data = await queryClient.fetchQuery(authQueryOptions);
+
+		// if(!data.address)
+		// {
+		// 	const res = await queryClient.fetchQuery({
+
+		// 	})
+		// }
+
 		return await queryClient.fetchQuery(authQueryOptions);
 	},
 	component: RouteComponent,
