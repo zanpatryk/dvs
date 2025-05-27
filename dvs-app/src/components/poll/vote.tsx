@@ -13,11 +13,16 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { DialogClose } from "@/components/ui/dialog";
+import {
+	DialogClose,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { CircleCheckBig } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { client } from "@/hono-client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { pollQueryOptions } from "@/lib/api";
 
 const FormSchema = z.object({
 	type: z.enum(["1", "2", "3"], {
@@ -25,26 +30,9 @@ const FormSchema = z.object({
 	}),
 });
 
-async function getPoll(pollId: string) {
-	const res = await client.api.polls[":id"].$get({
-		param: {
-			id: pollId,
-		},
-	});
-
-	if (!res.ok) throw new Error("Not found");
-
-	return await res.json();
-}
-
 const VotePoll = ({ pollId }: { pollId: string }) => {
 	// const poll = PollsData.find((poll) => poll.id === pollId);
-	const { isPending, error, data } = useQuery({
-		queryKey: ["get-poll"],
-		queryFn: async () => {
-			return getPoll(pollId);
-		},
-	});
+	const { isPending, error, data } = useQuery(pollQueryOptions(pollId));
 
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
@@ -65,17 +53,21 @@ const VotePoll = ({ pollId }: { pollId: string }) => {
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+				<DialogHeader>
+					<DialogTitle className="text-2xl font-bold">
+						{data.poll.title}
+					</DialogTitle>
+					<DialogDescription>
+						{data.poll.description}
+					</DialogDescription>
+				</DialogHeader>
 				<FormField
 					control={form.control}
 					name="type"
 					render={({ field }) => (
 						<FormItem className="space-y-3">
-							<FormLabel className="text-2xl font-bold">
-								{data.poll.title}
-							</FormLabel>
-							<FormDescription>
-								{data.poll.description}
-							</FormDescription>
+							<FormLabel>Options</FormLabel>
+							<FormDescription>Choose an option</FormDescription>
 							<FormControl>
 								<RadioGroup
 									onValueChange={field.onChange}
@@ -113,15 +105,17 @@ const VotePoll = ({ pollId }: { pollId: string }) => {
 					)}
 				/>
 				{form.formState.isValid ? (
-					<DialogClose>
-						<Button
-							type="submit"
-							className="bg-green-500 hover:bg-green-600"
-						>
-							<CircleCheckBig />
-							Vote
-						</Button>
-					</DialogClose>
+					<div>
+						<DialogClose asChild>
+							<Button
+								type="submit"
+								className="bg-green-500 hover:bg-green-600"
+							>
+								<CircleCheckBig />
+								Vote
+							</Button>
+						</DialogClose>
+					</div>
 				) : (
 					<Button
 						className="bg-green-500 hover:bg-green-600"

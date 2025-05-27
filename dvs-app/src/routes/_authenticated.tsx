@@ -1,22 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { authQueryOptions } from "@/hooks/use-auth";
+import { authQueryOptions } from "@/lib/api";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated")({
 	beforeLoad: async ({ context }) => {
 		const queryClient = context.queryClient;
 
-		// TODO: hit /refresh endpoint if failed the first time
-		// const data = await queryClient.fetchQuery(authQueryOptions);
-
-		// if(!data.address)
-		// {
-		// 	const res = await queryClient.fetchQuery({
-
-		// 	})
-		// }
-
-		return await queryClient.fetchQuery(authQueryOptions);
+		try {
+			return await queryClient.fetchQuery(authQueryOptions);
+		} catch {
+			return { address: null };
+		}
 	},
 	component: RouteComponent,
 });
