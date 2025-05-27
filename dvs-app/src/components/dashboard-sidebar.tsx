@@ -12,39 +12,56 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useMetaMask } from "@/hooks/use-meta-mask";
+import { UserRole } from "@/routes/_authenticated/_dashboard";
 import { Link } from "@tanstack/react-router";
-import { Clipboard, LogOut, Ticket, TriangleAlert } from "lucide-react";
+import { Clipboard, LogOut, Ticket, TriangleAlert, User } from "lucide-react";
 
 // Menu items.
 const urlBase = "/dashboard";
 
 const items = [
 	{
+		title: "Manage Tickets",
+		url: "/tickets",
+		icon: Ticket,
+		tag: "admin",
+	},
+	{
+		title: "Manage Users",
+		url: "/users",
+		icon: User,
+		tag: "admin",
+	},
+	{
 		title: "Tickets",
 		url: "/tickets",
 		icon: Ticket,
+		tag: "user, manager"
 	},
 	{
 		title: "Polls",
 		url: "/polls",
 		icon: Clipboard,
+		tag: "user, manager"
 	},
 ];
 
-export function DashboardSidebar() {
+export function DashboardSidebar({ role }: {role: UserRole}) {
 	const { logout } = useMetaMask();
 
 	return (
 		<Sidebar>
 			<SidebarHeader>
-				<img src="/public/dvs.svg" alt="DVS Logo" />
-				<h1 className="text-2xl text-app-primary font-medium text-center">{`Hello, USER!`}</h1>
+				<img src="/dvs.svg" alt="DVS Logo" />
+				<h1 className="text-2xl text-app-primary font-medium text-center">{`Hello, ${role.toUpperCase()}!`}</h1>
 			</SidebarHeader>
 			<SidebarContent>
 				<SidebarGroup>
 					<SidebarGroupContent>
 						<SidebarMenu>
-							{items.map((item) => (
+							{items.filter((item) => 
+								item.tag?.includes(role))
+							.map((item) => (
 								<SidebarMenuItem key={item.title}>
 									<SidebarMenuButton
 										asChild
