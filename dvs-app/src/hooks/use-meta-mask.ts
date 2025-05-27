@@ -12,13 +12,11 @@ export function useMetaMask() {
 			if (!window.ethereum) {
 				throw new Error("MetaMask not installed");
 			}
-			await window.ethereum.request({ method: "eth_requestAccounts" });
+			const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+			const address = accounts[0]; // Use the currently selected account
 
 			const provider = new ethers.BrowserProvider(window.ethereum);
-
-			const signer = await provider.getSigner();
-
-			const address = await signer.getAddress();
+			const signer = await provider.getSigner(address);
 
 			const nonceRes = await client.auth.nonce[":address"].$get({
 				param: {

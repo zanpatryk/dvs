@@ -24,6 +24,20 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 
 		return c.json(polls);
 	})
+	.get("/created", async (c) => {
+		const payload = c.get("jwtPayload");
+
+		const address = payload.sub;
+
+		const polls = await db
+			.select({ ...getTableColumns(pollsTable) })
+			.from(pollsTable)
+			.where(eq(pollsTable.creatorAddress, address));
+
+		if (polls.length === 0) return c.json({ error: "No polls found" }, 404);
+
+		return c.json(polls);
+	})
 	.get("/:id", async (c) => {
 		const payload = c.get("jwtPayload");
 		const pollId = c.req.param("id");
@@ -51,4 +65,4 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 		}
 
 		return c.json({ poll });
-	});
+	})
