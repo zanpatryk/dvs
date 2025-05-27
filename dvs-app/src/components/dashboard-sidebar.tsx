@@ -14,7 +14,7 @@ import {
 import { useMetaMask } from "@/hooks/use-meta-mask";
 import { UserRole } from "@/routes/_authenticated/_dashboard";
 import { Link } from "@tanstack/react-router";
-import { Clipboard, LogOut, Ticket, TriangleAlert, User } from "lucide-react";
+import { Clipboard, ClipboardList, LogOut, Ticket, TriangleAlert, User } from "lucide-react";
 
 // Menu items.
 const urlBase = "/dashboard";
@@ -31,6 +31,12 @@ const items = [
 		url: "/users",
 		icon: User,
 		tag: "admin",
+	},
+	{
+		title: "Manage Polls",
+		url: "/manage-polls",
+		icon: ClipboardList,
+		tag: "manager",
 	},
 	{
 		title: "Tickets",

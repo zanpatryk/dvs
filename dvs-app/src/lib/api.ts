@@ -56,9 +56,25 @@ async function getPolls() {
 	return await res.json();
 }
 
+async function getCreatedPolls() {
+	const res = await apiCall(() => client.api.polls.created.$get());
+
+	if (!res.ok) {
+		throw new Error(`Error ${res.status}`);
+	}
+	return await res.json();
+}
+
 export const pollsQueryOptions = queryOptions({
 	queryKey: ["get-polls"],
 	queryFn: getPolls,
+	staleTime: Infinity,
+	retry: false,
+});
+
+export const createdPollsQueryOptions = queryOptions({
+	queryKey: ["get-created-polls"],
+	queryFn: getCreatedPolls,
 	staleTime: Infinity,
 	retry: false,
 });

@@ -17,6 +17,7 @@ const WALLET_ROLE_MAP: Record<string, UserRole> = {
 	// "0x789...": UserRole.Admin,
 	"0xe621324665fbb008bef14ffaff85029d5dddc61d": UserRole.Admin, // 7blak | Account 1
 	"0x7d5312bfd5006f43b5c920224f1317f1b5ab53cc": UserRole.User, // 7blak | Account 2
+	"0x74075427b61ee3138e08ff4d820118600d2a3fe4": UserRole.Manager // 7blak | Account 3
 };
 
 function getRoleForWallet(address?: string): UserRole {
