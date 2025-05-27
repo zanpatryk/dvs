@@ -1,21 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import {
-	Clock,
-	CirclePlus,
-	CircleCheckBig,
-	// FileSearch,
-	// View,
-	// Award,
-} from "lucide-react";
+import { Clock, CirclePlus, CircleCheckBig } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import JoinPoll from "@/components/poll/join";
 import VotePoll from "@/components/poll/vote";
 import { StatsData } from "@/dummy/data";
-// import MintNFT from "@/components/poll/mint";
 import { useEffect, useState } from "react";
-// import ViewPoll from "@/components/poll/view";
-// import ViewResults from "@/components/poll/results";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { pollsQueryOptions } from "@/lib/api";
@@ -257,7 +247,7 @@ function RouteComponent() {
 							{!isError && isPending ? (
 								<Skeleton className="h-4" />
 							) : (
-								data.map((poll) => (
+								data?.map((poll) => (
 									<PollCard
 										key={poll.id}
 										id={poll.id}

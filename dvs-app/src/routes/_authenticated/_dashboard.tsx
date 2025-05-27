@@ -31,6 +31,7 @@ const WALLET_ROLE_MAP: Record<string, UserRole> = {
 	"0xe621324665fbb008bef14ffaff85029d5dddc61d": UserRole.Admin, // 7blak | Account 1
 	"0x7d5312bfd5006f43b5c920224f1317f1b5ab53cc": UserRole.User, // 7blak | Account 2
 	"0x74075427b61ee3138e08ff4d820118600d2a3fe4": UserRole.Manager, // 7blak | Account 3
+	"0x30523b4fa092ec6517b725d9a37e0ad3b7b2ea73": UserRole.Manager, // Yourekt | Account 1
 };
 
 function getRoleForWallet(address?: string): UserRole {
@@ -58,7 +59,8 @@ function RouteComponent() {
 		from: currentMatch.routeId,
 	});
 
-	const { headerAction } = context;
+	const headerAction =
+		"headerAction" in context ? context.headerAction : undefined;
 
 	const address = useAuth().data?.address ?? undefined;
 	const userRole = getRoleForWallet(address);
@@ -76,9 +78,13 @@ function RouteComponent() {
 									Dashboard
 								</h1>
 							</div>
-							<HeaderActionButton
-								action={headerAction as DashboardHeaderAction}
-							/>
+							{headerAction && (
+								<HeaderActionButton
+									action={
+										headerAction as DashboardHeaderAction
+									}
+								/>
+							)}
 						</header>
 						<Outlet />
 					</SidebarInset>
@@ -104,15 +110,7 @@ function HeaderActionButton({ action }: { action: DashboardHeaderAction }) {
 	}
 
 	return (
-		<Button
-			variant={action.variant || "default"}
-			onClick={action.onClick}
-			className={
-				action.variant === "default"
-					? "bg-blue-600 hover:bg-blue-700"
-					: undefined
-			}
-		>
+		<Button className="bg-blue-600 hover:bg-blue-700">
 			{action.icon}
 			{action.label}
 		</Button>
