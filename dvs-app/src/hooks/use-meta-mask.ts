@@ -74,6 +74,7 @@ export function useMetaMask() {
 	});
 	return {
 		login: loginMutation.mutate,
+		isLoginPending: loginMutation.isPending,
 		logout: logoutMutation.mutate,
 		refresh: refreshMutation.mutate,
 	};

@@ -4,22 +4,22 @@ import {
 	Clock,
 	CirclePlus,
 	CircleCheckBig,
-	FileSearch,
-	View,
-	Award,
+	// FileSearch,
+	// View,
+	// Award,
 } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import JoinPoll from "@/components/poll/join";
 import VotePoll from "@/components/poll/vote";
 import { StatsData } from "@/dummy/data";
-import MintNFT from "@/components/poll/mint";
+// import MintNFT from "@/components/poll/mint";
 import { useEffect, useState } from "react";
-import ViewPoll from "@/components/poll/view";
-import ViewResults from "@/components/poll/results";
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { client } from "@/hono-client";
+// import ViewPoll from "@/components/poll/view";
+// import ViewResults from "@/components/poll/results";
+import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { pollsQueryOptions } from "@/lib/api";
 
 export const Route = createFileRoute(
 	"/_authenticated/_dashboard/dashboard/polls"
@@ -190,25 +190,19 @@ function PollCard({ id, title, description, endDate }: PollCardProps) {
 	);
 }
 
-async function getPolls() {
-	let res = await client.api.polls.$get();
-	if (!res.ok) {
-		if (res.status === 401) {
-			const refresh = await client.auth.refresh.$post();
-			if (!refresh.ok) throw new Error("Refresh failed");
-			// retry original
-			res = await client.api.polls.$get();
-			if (!res.ok) throw new Error(`${res.status}`);
-		} else throw new Error(`${res.status}`);
-	}
-	return await res.json();
-}
-
-const pollsQueryOptions = queryOptions({
-	queryKey: ["get-polls"],
-	queryFn: getPolls,
-	staleTime: 5 * 60 * 1000,
-});
+// async function getPolls() {
+// 	let res = await client.api.polls.$get();
+// 	if (!res.ok) {
+// 		if (res.status === 401) {
+// 			const refresh = await client.auth.refresh.$post();
+// 			if (!refresh.ok) throw new Error("Refresh failed");
+// 			// retry original
+// 			res = await client.api.polls.$get();
+// 			if (!res.ok) throw new Error(`${res.status}`);
+// 		} else throw new Error(`${res.status}`);
+// 	}
+// 	return await res.json();
+// }
 
 function RouteComponent() {
 	const { isPending, error, data } = useQuery(pollsQueryOptions);
