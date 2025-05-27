@@ -23,7 +23,7 @@ function RouteComponent() {
 	return <Outlet />;
 }
 
-function Unauthorized() {
+export function Unauthorized() {
 	return (
 		<div className="h-screen m-auto max-w-2xl flex flex-col justify-center items-center gap-4 ">
 			<h1 className="font-bold text-2xl">

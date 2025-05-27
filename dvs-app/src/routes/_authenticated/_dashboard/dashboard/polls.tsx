@@ -8,7 +8,6 @@ import {
 	// View,
 	// Award,
 } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import JoinPoll from "@/components/poll/join";
 import VotePoll from "@/components/poll/vote";
@@ -20,10 +19,20 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { pollsQueryOptions } from "@/lib/api";
+import { DashboardHeaderAction } from "@/routes/_authenticated/_dashboard";
 
 export const Route = createFileRoute(
 	"/_authenticated/_dashboard/dashboard/polls"
 )({
+	beforeLoad: () => {
+		const headerAction: DashboardHeaderAction = {
+			label: "Join Poll",
+			icon: <CirclePlus className="mr-2 h-4 w-4" />,
+			dialog: <JoinPoll />,
+		};
+
+		return { headerAction };
+	},
 	component: RouteComponent,
 });
 
@@ -205,15 +214,11 @@ function PollCard({ id, title, description, endDate }: PollCardProps) {
 // }
 
 function RouteComponent() {
-	const { isPending, error, data } = useQuery(pollsQueryOptions);
-
-	if (error) {
-		return <div>Error: {error.message}</div>;
-	}
+	const { isPending, isError, data } = useQuery(pollsQueryOptions);
 
 	return (
 		<>
-			<header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
+			{/* <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
 				<div className="flex items-center gap-2">
 					<SidebarTrigger />
 					<h1 className="text-3xl font-bold">Dashboard</h1>
@@ -229,7 +234,7 @@ function RouteComponent() {
 						<JoinPoll />
 					</DialogContent>
 				</Dialog>
-			</header>
+			</header> */}
 			<div className="flex-1 p-6 bg-gray-100">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 					{StatsData.map((stat) => (
@@ -249,7 +254,7 @@ function RouteComponent() {
 							Active Votes
 						</h2>
 						<div className="space-y-4">
-							{isPending ? (
+							{!isError && isPending ? (
 								<Skeleton className="h-4" />
 							) : (
 								data.map((poll) => (
