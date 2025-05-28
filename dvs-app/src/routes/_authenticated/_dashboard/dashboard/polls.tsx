@@ -1,15 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Clock, CirclePlus, CircleCheckBig } from "lucide-react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { CirclePlus, Inbox } from "lucide-react";
 import JoinPoll from "@/components/poll/join";
-import VotePoll from "@/components/poll/vote";
-import { StatsData } from "@/dummy/data";
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { pollsQueryOptions } from "@/lib/api";
 import { DashboardHeaderAction } from "@/routes/_authenticated/_dashboard";
+import { PollCard } from "@/components/dashboard/poll-card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute(
 	"/_authenticated/_dashboard/dashboard/polls"
@@ -26,268 +24,171 @@ export const Route = createFileRoute(
 	component: RouteComponent,
 });
 
-interface StatsCardProps {
-	title: string;
-	value: string;
-	icon: React.ReactNode;
-}
-
-export function StatsCard({ title, value, icon }: StatsCardProps) {
-	return (
-		<div className="bg-white rounded-lg p-6 flex justify-between items-center shadow-sm">
-			<div>
-				<h3 className="text-lg font-medium">{title}</h3>
-				<p className="text-4xl font-bold mt-2">{value}</p>
-			</div>
-			<div className="text-slate-400">{icon}</div>
-		</div>
-	);
-}
-
-interface PollCardProps {
-	id: string;
+function EmptyState({
+	title,
+	description,
+}: {
 	title: string;
 	description: string;
-	endDate?: Date;
-}
-
-function PollCard({ id, title, description, endDate }: PollCardProps) {
-	const [timeRemaining, setTimeRemaining] = useState({
-		days: 0,
-		hours: 0,
-		minutes: 0,
-		seconds: 0,
-	});
-
-	useEffect(() => {
-		const targetDate = (
-			endDate ?? new Date(Date.now() - 60 * 1000)
-		).getTime();
-		const interval = setInterval(() => {
-			const now = Date.now();
-			const distance = targetDate - now;
-			if (distance < 0) {
-				clearInterval(interval);
-				setTimeRemaining({
-					days: 0,
-					hours: 0,
-					minutes: 0,
-					seconds: 0,
-				});
-				return;
-			}
-			const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-			const hours = Math.floor(
-				(distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-			);
-			const minutes = Math.floor(
-				(distance % (1000 * 60 * 60)) / (1000 * 60)
-			);
-			const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-			setTimeRemaining({ days, hours, minutes, seconds });
-		}, 1000);
-		return () => clearInterval(interval);
-	}, [endDate]);
-
+}) {
 	return (
-		<div className="bg-white rounded-lg p-6 shadow-sm">
-			<div className="mb-4">
-				<h3 className="text-lg font-medium">{title}</h3>
-				<p className="text-sm text-muted-foreground">{description}</p>
+		<div className="flex flex-col items-center justify-center py-12 text-center">
+			<div className="rounded-full bg-gray-200 p-6 mb-4">
+				<Inbox className="h-8 w-8 text-gray-400" />
 			</div>
-
-			{endDate && endDate.getTime() > Date.now() && (
-				<div className="flex items-center text-sm text-slate-500 mb-4">
-					<Clock className="h-4 w-4 mr-2" />
-					Voting ends in:{" "}
-					{timeRemaining.days > 0 && `${timeRemaining.days}d `}
-					{timeRemaining.hours > 0 && `${timeRemaining.hours}h `}
-					{timeRemaining.minutes > 0 && `${timeRemaining.minutes}m `}
-					{timeRemaining.seconds > 0 && `${timeRemaining.seconds}s`}
-				</div>
-			)}
-
-			<div className="flex justify-end space-x-2">
-				<Dialog>
-					<DialogTrigger asChild>
-						<Button className="bg-blue-600 hover:bg-blue-700">
-							<CircleCheckBig />
-							Vote
-						</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<VotePoll pollId={id} />
-					</DialogContent>
-				</Dialog>
-				{/* {(() => {
-					switch (status) {
-						case PollStatus.Active:
-							return (
-								<Dialog>
-									<DialogTrigger asChild>
-										<Button className="bg-blue-600 hover:bg-blue-700">
-											<CircleCheckBig />
-											Vote
-										</Button>
-									</DialogTrigger>
-									<DialogContent>
-										<VotePoll pollId={id} />
-									</DialogContent>
-								</Dialog>
-							);
-						case PollStatus.Voted:
-							return (
-								<Dialog>
-									<DialogTrigger asChild>
-										<Button
-											variant="outline"
-											className="text-blue-600 border-blue-600"
-										>
-											<FileSearch />
-											View Poll
-										</Button>
-									</DialogTrigger>
-									<DialogContent>
-										<ViewPoll pollId={id} />
-									</DialogContent>
-								</Dialog>
-							);
-						case PollStatus.Finished:
-							return (
-								<Dialog>
-									<DialogTrigger asChild>
-										<Button className="bg-green-500 hover:bg-green-600">
-											<Award />
-											Mint participation NFT
-										</Button>
-									</DialogTrigger>
-									<DialogContent>
-										<MintNFT pollId={id} />
-									</DialogContent>
-								</Dialog>
-							);
-						case PollStatus.Minted:
-							return (
-								<Dialog>
-									<DialogTrigger asChild>
-										<Button className="bg-green-500 hover:bg-green-600">
-											<View />
-											View Results
-										</Button>
-									</DialogTrigger>
-									<DialogContent>
-										<ViewResults pollId={id} />
-									</DialogContent>
-								</Dialog>
-							);
-						default:
-							return null;
-					}
-				})()} */}
-			</div>
+			<h3 className="text-lg font-semibold text-gray-900 mb-2">
+				{title}
+			</h3>
+			<p className="text-sm text-gray-500 max-w-sm">{description}</p>
 		</div>
 	);
 }
 
-// async function getPolls() {
-// 	let res = await client.api.polls.$get();
-// 	if (!res.ok) {
-// 		if (res.status === 401) {
-// 			const refresh = await client.auth.refresh.$post();
-// 			if (!refresh.ok) throw new Error("Refresh failed");
-// 			// retry original
-// 			res = await client.api.polls.$get();
-// 			if (!res.ok) throw new Error(`${res.status}`);
-// 		} else throw new Error(`${res.status}`);
-// 	}
-// 	return await res.json();
-// }
+function LoadingSkeleton() {
+	return (
+		<div className="space-y-4">
+			{[1, 2, 3].map((i) => (
+				<Card key={i}>
+					<CardHeader>
+						<div className="flex items-start justify-between">
+							<div className="space-y-2 flex-1">
+								<Skeleton className="h-5 w-3/4" />
+								<Skeleton className="h-4 w-full" />
+							</div>
+							<Skeleton className="h-6 w-16 ml-2" />
+						</div>
+					</CardHeader>
+					<CardContent>
+						<div className="space-y-3">
+							<div className="flex gap-4">
+								<Skeleton className="h-4 w-24" />
+								<Skeleton className="h-4 w-32" />
+							</div>
+							<Skeleton className="h-12 w-full" />
+							<Skeleton className="h-10 w-full" />
+						</div>
+					</CardContent>
+				</Card>
+			))}
+		</div>
+	);
+}
 
 function RouteComponent() {
 	const { isPending, isError, data } = useQuery(pollsQueryOptions);
 
+	const activePolls =
+		data?.filter((poll) => {
+			const endTime = poll.endTime ? new Date(poll.endTime) : null;
+			return !endTime || endTime.getTime() > Date.now();
+		}) || [];
+
+	const completedPolls =
+		data?.filter((poll) => {
+			const endTime = poll.endTime ? new Date(poll.endTime) : null;
+			return endTime && endTime.getTime() <= Date.now();
+		}) || [];
+
 	return (
-		<>
-			{/* <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
-				<div className="flex items-center gap-2">
-					<SidebarTrigger />
-					<h1 className="text-3xl font-bold">Dashboard</h1>
-				</div>
-				<Dialog>
-					<DialogTrigger asChild>
-						<Button className="bg-blue-600 hover:bg-blue-700">
-							<CirclePlus />
-							Join a Poll
-						</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<JoinPoll />
-					</DialogContent>
-				</Dialog>
-			</header> */}
-			<div className="flex-1 p-6 bg-gray-100">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-					{StatsData.map((stat) => (
-						<StatsCard
-							key={stat.title}
-							title={stat.title}
-							value={stat.value}
-							icon={
-								stat.icon && <stat.icon className="h-6 w-6" />
-							}
-						/>
-					))}
-				</div>
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-					<div className="max-h-[calc(100vh-20rem)] overflow-y-auto">
-						<h2 className="sticky top-0 bg-gray-100 border-b text-xl font-medium text-muted-foreground pb-4">
-							Active Votes
+		<div className="h-full flex flex-col">
+			{/* Header Section */}
+			<div className="mb-6 flex-shrink-0">
+				<h1 className="text-3xl font-bold text-gray-900 mb-2">Polls</h1>
+				<p className="text-gray-600">
+					Participate in active polls and view completed ones
+				</p>
+			</div>
+
+			{/* Content Grid */}
+			<div className="flex-1 grid grid-cols-1 xl:grid-cols-2 gap-8 min-h-0">
+				{/* Active Polls */}
+				<div className="flex flex-col min-h-0">
+					<div className="flex items-center justify-between mb-4 flex-shrink-0">
+						<h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+							<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+							Active Polls
 						</h2>
-						<div className="space-y-4">
-							{!isError && isPending ? (
-								<Skeleton className="h-4" />
-							) : (
-								data?.map((poll) => (
-									<PollCard
-										key={poll.id}
-										id={poll.id}
-										title={poll.title}
-										description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-										endDate={
-											poll.endTime
-												? new Date(poll.endTime)
-												: undefined
-										}
-									/>
-								))
-							)}
-						</div>
+						<Badge
+							variant="outline"
+							className="text-green-700 border-green-200"
+						>
+							{activePolls.length} active
+						</Badge>
 					</div>
-					<div className="max-h-[calc(100vh-20rem)] overflow-y-auto">
-						<h2 className="sticky top-0 bg-gray-100 border-b text-xl font-medium text-muted-foreground pb-4">
-							Complete Votes
+
+					<div className="flex-1 overflow-y-auto space-y-4 pr-2">
+						{isPending ? (
+							<LoadingSkeleton />
+						) : isError ? (
+							<div className="text-center py-8 text-red-600">
+								Failed to load polls. Please try again.
+							</div>
+						) : activePolls.length === 0 ? (
+							<EmptyState
+								title="No Active Polls"
+								description="There are currently no active polls. Join a poll to get started!"
+							/>
+						) : (
+							activePolls.map((poll) => (
+								<PollCard
+									key={poll.id}
+									id={poll.id}
+									title={poll.title}
+									description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+									endDate={
+										poll.endTime
+											? new Date(poll.endTime)
+											: undefined
+									}
+									isActive={true}
+								/>
+							))
+						)}
+					</div>
+				</div>
+
+				{/* Completed Polls */}
+				<div className="flex flex-col min-h-0">
+					<div className="flex items-center justify-between mb-4 flex-shrink-0">
+						<h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+							<div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+							Completed Polls
 						</h2>
-						<div className="space-y-4">
-							<Skeleton className="h-4" />
-							{/* {PollsData.map(
-								(poll) =>
-									(poll.status === PollStatus.Minted ||
-										poll.status ===
-											PollStatus.Finished) && (
-										<PollCard
-											key={poll.id}
-											id={poll.id}
-											title={poll.title}
-											description={poll.description}
-											endDate={poll.endDate}
-											status={poll.status}
-										/>
-									)
-							)} */}
-						</div>
+						<Badge
+							variant="outline"
+							className="text-gray-700 border-gray-200"
+						>
+							{completedPolls.length} completed
+						</Badge>
+					</div>
+
+					<div className="flex-1 overflow-y-auto space-y-4 pr-2">
+						{isPending ? (
+							<LoadingSkeleton />
+						) : completedPolls.length === 0 ? (
+							<EmptyState
+								title="No Completed Polls"
+								description="Completed polls will appear here once they finish."
+							/>
+						) : (
+							completedPolls.map((poll) => (
+								<PollCard
+									key={poll.id}
+									id={poll.id}
+									title={poll.title}
+									description={poll.description}
+									endDate={
+										poll.endTime
+											? new Date(poll.endTime)
+											: undefined
+									}
+									isActive={false}
+								/>
+							))
+						)}
 					</div>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }
