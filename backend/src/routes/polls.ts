@@ -52,7 +52,7 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 			startTime: new Date(),
 			endTime: new Date(poll.endTime)
 		})
-		
+
 		const responseCreate = await db
 			.insert(pollsTable)
 			.values(polldb)
@@ -73,7 +73,7 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 		} catch {
 			return c.text("Could not insert option into db")
 		}
-		
+
 		c.status(201);
 		return c.json(responseCreate);
 	})
@@ -103,11 +103,34 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 		const polls = await db
 			.select({ ...getTableColumns(pollsTable) })
 			.from(pollsTable)
-			.where(eq(pollsTable.creatorAddress, address));
+			.where(eq(pollsTable.creatorAddress, address))
 
-		if (polls.length === 0) return c.json({ error: "No polls found" }, 404);
+		if (!polls) return c.json({ error: "No polls found" }, 404);
 
 		return c.json(polls);
+	})
+	.post("/:id/close", async (c) => {
+		const payload = c.get("jwtPayload");
+
+		const address = payload.sub;
+
+		const pollId = c.req.param("id")
+
+		const result = await db
+			.update(pollsTable)
+			.set({ hasEndedPrematurely: true })
+			.where(
+				and(
+					eq(pollsTable.id, pollId),
+					eq(pollsTable.creatorAddress, address)
+				)
+			)
+			.returning();
+
+		if (result.length === 0) {
+			return c.json({ error: "Poll not found or not authorized" }, 404);
+		}
+		return c.json({ message: "Poll closed successfully" }, 200);
 	})
 	.get("/:id", async (c) => {
 		const payload = c.get("jwtPayload");

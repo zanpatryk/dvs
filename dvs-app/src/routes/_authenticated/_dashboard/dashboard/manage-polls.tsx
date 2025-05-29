@@ -94,7 +94,7 @@ function RouteComponent() {
 					<CardContent className="h-full flex flex-col">
 						{isPending ? (
 							<LoadingSkeleton />
-						) : !error?.message.includes("No polls found") ? (
+						) : !error?.message.includes("No polls found") && error !== null? (
 							<div className="flex flex-col items-center justify-center py-12 text-center">
 								<div className="text-red-600 mb-4">
 									Error loading polls

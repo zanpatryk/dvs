@@ -1,8 +1,9 @@
-import ViewTicketResponse from "@/components/ticket/response";
-import ViewTicket from "@/components/ticket/view";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
+import { client } from "@/hono-client";
+import { apiCall } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
+import { queryClient } from "@/main";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { ColumnDef } from "@tanstack/react-table";
 import { FileSearch } from "lucide-react";
@@ -12,8 +13,11 @@ export const columns: ColumnDef<{
 	creatorAddress: string;
 	title: string;
 	description: string;
+	participantLimit: number;
+	accessCode: string;
 	startTime: string;
 	endTime: string | null;
+	hasEndedPrematurely: boolean | null;
 }>[] = [
 		{
 			accessorKey: "id",
@@ -48,18 +52,30 @@ export const columns: ColumnDef<{
 			header: "Participants",
 		},
 		{
+			accessorKey: "hasEndedPrematurely",
+			header: "Ended Prematurely",
+			cell: ({ row }) => {
+				return (
+					<p className={row.getValue("hasEndedPrematurely") ? "text-orange-500" : "text-green-500"}>
+						{row.getValue("hasEndedPrematurely") ? "Yes" : "No"}
+					</p>
+				)
+			}
+		},
+		{
 			header: "Status",
 			cell: ({ row }) => {
 				const endDate = new Date(row.getValue("endTime") as string);
+				const hasEndedPrematurely = row.getValue("hasEndedPrematurely") as boolean | null;
 				return (
 					<p
 						className={
-							new Date() > endDate
-								? "text-yellow-500"
+							new Date() > endDate || hasEndedPrematurely
+								? "text-black-500"
 								: "text-green-500"
 						}
 					>
-						{ new Date() > endDate ? "Complete" : "Active"}
+						{new Date() > endDate || hasEndedPrematurely ? "Complete" : "Active"}
 					</p>
 				);
 			},
@@ -69,8 +85,9 @@ export const columns: ColumnDef<{
 			cell: ({ row }) => {
 				const pollId = row.getValue("id") as string;
 				const endDate = new Date(row.getValue("endTime") as string);
+				const hasEndedPrematurely = row.getValue("hasEndedPrematurely") as boolean | null;
 
-				return new Date() > endDate ? (
+				return new Date() > endDate || hasEndedPrematurely ? (
 					<Dialog>
 						<DialogTrigger asChild>
 							<Button
@@ -96,9 +113,35 @@ export const columns: ColumnDef<{
 								End
 							</Button>
 						</DialogTrigger>
-						{/* Add poll ending */}
-						{/* <DialogContent>
-						</DialogContent> */}
+						<DialogContent>
+							<div className="flex flex-col gap-4">
+								<p>Are you sure you want to end this poll prematurely?</p>
+								<div className="flex justify-end gap-2">
+									<DialogClose asChild>
+										<Button variant="outline">Cancel</Button>
+									</DialogClose>
+									<Button
+										className="bg-red-500 hover:bg-red-600"
+										onClick={async () => {
+											const res = await apiCall(() => client.api.polls[":id"].close.$post({
+												param: {
+													id: pollId,
+												},
+											}))
+
+											if (!res.ok) {
+												console.error("Failed to end poll:", res.statusText);
+											}
+
+											queryClient.invalidateQueries({ queryKey: ["get-created-polls"] })
+											queryClient.invalidateQueries({ queryKey: ["get-polls"] })
+										}}
+									>
+										Confirm
+									</Button>
+								</div>
+							</div>
+						</DialogContent>
 					</Dialog>
 				);
 			},

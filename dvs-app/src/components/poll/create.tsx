@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { client } from "@/hono-client"
 import { apiCall } from "@/lib/api"
+import { queryClient } from "@/main"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { DialogClose } from "@radix-ui/react-dialog"
 import { Plus, X } from "lucide-react"
@@ -58,6 +59,9 @@ const CreatePoll = () => {
         }
 
         const asdas = await res.json()
+
+        queryClient.invalidateQueries({ queryKey: ["get-created-polls"] })
+
         console.log(asdas)
     }
 
@@ -180,12 +184,23 @@ const CreatePoll = () => {
                         </FormItem>
                     )}
                 />
-                <div className="flex space-x-4 pt-4">
-                    <Button type="submit" className="bg-green-500 hover:bg-green-600">+ Create</Button>
-                    <DialogClose>
-                        <Button type="button" className="bg-red-500 hover:bg-red-600" variant="destructive">× Cancel</Button>
-                    </DialogClose>
-                </div>
+                {form.formState.isValid ? (
+                    <div className="flex space-x-4">
+                        <DialogClose>
+                            <Button type="submit" className="bg-green-500 hover:bg-green-600">+ Create</Button>
+                        </DialogClose>
+                        <DialogClose>
+                            <Button type="button" className="bg-red-500 hover:bg-red-600" variant="destructive">× Cancel</Button>
+                        </DialogClose>
+                    </div>
+                ) : (
+                    <div className="flex space-x-4">
+                        <Button type="submit" className="bg-green-500 hover:bg-green-600" disabled>+ Create</Button>
+                        <DialogClose>
+                            <Button type="button" className="bg-red-500 hover:bg-red-600" variant="destructive">× Cancel</Button>
+                        </DialogClose>
+                    </div>
+                )}
             </form>
         </Form>
     )

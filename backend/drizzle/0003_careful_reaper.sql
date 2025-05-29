@@ -1,0 +1,1 @@
+ALTER TABLE "polls" ADD COLUMN "has_ended_prematurely" boolean DEFAULT false;
