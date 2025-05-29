@@ -15,6 +15,13 @@
       "when": 1748522656645,
       "tag": "0001_flaky_dark_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1748524926403,
+      "tag": "0002_sleepy_grim_reaper",
+      "breakpoints": true
     }
   ]
 }
