@@ -92,8 +92,9 @@ export function DashboardSidebar({ role }: { role: UserRole }) {
 			<SidebarHeader className="p-6">
 				<div className="flex flex-col items-center space-y-4">
 					{/* Logo */}
-					<img src="/dvs.svg" alt="DVS Logo" />
-
+					<Link to="/">
+						<img src="/dvs.svg" alt="DVS Logo" />
+					</Link>
 					{/* Role Header */}
 					<div
 						className={`w-full p-4 rounded-xl bg-gradient-to-r ${config.gradient} text-white shadow-lg`}
