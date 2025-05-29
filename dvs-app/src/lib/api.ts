@@ -50,7 +50,8 @@ async function getPolls() {
 	const res = await apiCall(() => client.api.polls.$get());
 
 	if (!res.ok) {
-		throw new Error(`Error ${res.status}`);
+		const data = await res.json();
+		throw new Error("error" in data ? data.error : `Error ${res.status}`);
 	}
 
 	return await res.json();
@@ -60,8 +61,10 @@ async function getCreatedPolls() {
 	const res = await apiCall(() => client.api.polls.created.$get());
 
 	if (!res.ok) {
-		throw new Error(`Error ${res.status}`);
+		const data = await res.json();
+		throw new Error("error" in data ? data.error : `Error ${res.status}`);
 	}
+
 	return await res.json();
 }
 

@@ -1,4 +1,3 @@
-import JoinPoll from "@/components/poll/join";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import CreatePoll from "@/components/poll/create";
@@ -8,7 +7,7 @@ import { DataTable } from "@/polls/data-table";
 import { DashboardHeaderAction } from "@/routes/_authenticated/_dashboard";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CirclePlus, FolderOpen } from "lucide-react";
+import { CirclePlus, Inbox } from "lucide-react";
 
 export const Route = createFileRoute(
 	"/_authenticated/_dashboard/dashboard/manage-polls"
@@ -29,7 +28,7 @@ function EmptyState() {
 	return (
 		<div className="flex flex-col items-center justify-center py-12 text-center">
 			<div className="rounded-full bg-gray-200 p-6 mb-4">
-				<FolderOpen className="h-8 w-8 text-gray-400" />
+				<Inbox className="h-8 w-8 text-gray-400" />
 			</div>
 			<h3 className="text-lg font-semibold text-gray-900 mb-2">
 				No Polls Created
@@ -74,7 +73,8 @@ function LoadingSkeleton() {
 }
 
 function RouteComponent() {
-	const { isPending, isError, data } = useQuery(createdPollsQueryOptions);
+	const { isPending, error, data } = useQuery(createdPollsQueryOptions);
+	const createdPolls = data || [];
 
 	return (
 		<div className="h-full flex flex-col">
@@ -94,7 +94,7 @@ function RouteComponent() {
 					<CardContent className="h-full flex flex-col">
 						{isPending ? (
 							<LoadingSkeleton />
-						) : isError ? (
+						) : !error?.message.includes("No polls found") ? (
 							<div className="flex flex-col items-center justify-center py-12 text-center">
 								<div className="text-red-600 mb-4">
 									Error loading polls
@@ -103,11 +103,14 @@ function RouteComponent() {
 									Failed to load polls. Please try again.
 								</p>
 							</div>
-						) : !data || data.length === 0 ? (
+						) : createdPolls.length === 0 ? (
 							<EmptyState />
 						) : (
 							<div className="flex-1 overflow-hidden px-2">
-								<DataTable columns={columns} data={data} />
+								<DataTable
+									columns={columns}
+									data={createdPolls}
+								/>
 							</div>
 						)}
 					</CardContent>
