@@ -90,7 +90,7 @@ const CreatePoll = () => {
                                     placeholder="Enter the poll description"
                                     rows={4}
                                     {...field}
-                                    className="overflow-auto"
+                                    className="overflow-auto resize-none"
                                 />
                             </FormControl>
                         </FormItem>
