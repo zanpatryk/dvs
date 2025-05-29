@@ -5,6 +5,7 @@ import { pollsInsertSchema, pollsOptionsTable, pollsParticipantsTable, pollsTabl
 import type { Variables } from "./auth";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
+import { seedTable } from "../db/schema/code-seed";
 
 const PollInsertSchema = z.object({
 	title: z.string().min(1),
@@ -17,6 +18,7 @@ const PollInsertSchema = z.object({
 		.string()
 		.refine((val) => !isNaN(Date.parse(val))),
 	managerIncluded: z.boolean(),
+	participantLimit: z.number().min(1),
 });
 
 export const pollsRoute = new Hono<{ Variables: Variables }>()
@@ -29,11 +31,24 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 
 		const pollid = Date.now().toString()
 
+		const pollCode = await db.transaction(async (tx) => {
+			const [row] = await tx.select().from(seedTable).limit(1);
+			if (!row) throw new Error("Seed row not found");
+
+			const currentSeed = row.seed;
+
+			await tx.update(seedTable).set({ seed: currentSeed + 1 });
+
+			return currentSeed;
+		})
+
 		const polldb = pollsInsertSchema.parse({
 			id: pollid,
 			creatorAddress: address,
 			title: poll.title,
 			description: poll.description,
+			participantLimit: poll.participantLimit,
+			accessCode: pollCode.toString().padStart(6, "0"),
 			startTime: new Date(),
 			endTime: new Date(poll.endTime)
 		})

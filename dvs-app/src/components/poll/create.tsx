@@ -24,6 +24,7 @@ const FormSchema = z.object({
         .string()
         .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
     managerIncluded: z.boolean(),
+    participantLimit: z.coerce.number().min(1, { message: "Participant limit must be at least 1" }),
 });
 
 const CreatePoll = () => {
@@ -38,6 +39,7 @@ const CreatePoll = () => {
             options: [],
             endTime: "",
             managerIncluded: false,
+            participantLimit: 100,
         },
     });
 
@@ -146,6 +148,19 @@ const CreatePoll = () => {
                             <FormLabel>End Time*</FormLabel>
                             <FormControl>
                                 <Input type="datetime-local" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="participantLimit"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Participant Limit*</FormLabel>
+                            <FormControl>
+                                <Input type="number" min={1} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
