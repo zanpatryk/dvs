@@ -1,6 +1,7 @@
 import { relations, type InferSelectModel } from "drizzle-orm";
 import {
 	index,
+	integer,
 	numeric,
 	pgTable,
 	primaryKey,
@@ -17,6 +18,8 @@ export const pollsTable = pgTable(
 		creatorAddress: varchar("creator_address", { length: 42 }).notNull(),
 		title: text("title").notNull(),
 		description: text("desctiption").notNull(),
+		participantLimit: integer("participant_limit").notNull(),
+		accessCode: varchar("access_code", { length: 6 }).notNull(),
 		startTime: timestamp("start_time").notNull(),
 		endTime: timestamp("end_time"),
 	},
