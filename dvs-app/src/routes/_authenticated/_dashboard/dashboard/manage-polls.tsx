@@ -1,6 +1,7 @@
 import JoinPoll from "@/components/poll/join";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import CreatePoll from "@/components/poll/create";
 import { createdPollsQueryOptions } from "@/lib/api";
 import { columns } from "@/polls/columns";
 import { DataTable } from "@/polls/data-table";
@@ -16,7 +17,7 @@ export const Route = createFileRoute(
 		const headerAction: DashboardHeaderAction = {
 			label: "Create Poll",
 			icon: <CirclePlus className="mr-2 h-4 w-4" />,
-			dialog: <JoinPoll />,
+			dialog: <CreatePoll />,
 		};
 
 		return { headerAction };
