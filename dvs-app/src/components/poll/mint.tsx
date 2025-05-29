@@ -11,13 +11,11 @@ const MintNFT = ({ pollId }: { pollId: string }) => {
 	if (!poll) {
 		return <div>Poll not found</div>;
 	}
-	
+
 	return (
 		<div className="space-y-6">
 			<h1 className="text-2xl font-bold">{poll.title}</h1>
-			<p className="text-muted-foreground text-sm">
-				{poll.description}
-			</p>
+			<p className="text-muted-foreground text-sm">{poll.description}</p>
 			<RadioGroup defaultValue="2">
 				<div className="flex items-center space-x-2">
 					<RadioGroupItem value="1" id="1" disabled />
@@ -37,7 +35,7 @@ const MintNFT = ({ pollId }: { pollId: string }) => {
 				</div>
 			</RadioGroup>
 
-			<DialogClose>
+			<DialogClose asChild>
 				<Button
 					className="bg-green-500 hover:bg-green-600"
 					onClick={() => console.log("NFT has been minted")}

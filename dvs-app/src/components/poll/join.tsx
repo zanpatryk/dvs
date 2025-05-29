@@ -20,6 +20,7 @@ import {
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { DialogClose } from "@/components/ui/dialog";
 import { CirclePlus } from "lucide-react";
+import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 
 const FormSchema = z.object({
 	code: z.string().min(6, {
@@ -50,13 +51,17 @@ const JoinPoll = () => {
 					name="code"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel className="text-2xl font-bold">
-								Join Poll
-							</FormLabel>
-							<FormDescription>
-								Please enter the one-time code provided by the
-								poll creator.
-							</FormDescription>
+							<DialogTitle>
+								<FormLabel className="text-2xl font-bold">
+									Join Poll
+								</FormLabel>
+							</DialogTitle>
+							<DialogDescription>
+								<FormDescription>
+									Please enter the one-time code provided by
+									the poll creator.
+								</FormDescription>
+							</DialogDescription>
 							<FormControl>
 								<InputOTP
 									maxLength={6}
@@ -78,7 +83,7 @@ const JoinPoll = () => {
 					)}
 				/>
 				{form.formState.isValid ? (
-					<DialogClose>
+					<DialogClose asChild>
 						<Button
 							type="submit"
 							className="bg-green-500 hover:bg-green-600"
