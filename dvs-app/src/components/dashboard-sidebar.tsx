@@ -30,10 +30,10 @@ const urlBase = "/dashboard";
 
 const items = [
 	{
-		title: "Manage Tickets",
-		url: "/tickets",
-		icon: Ticket,
-		tag: "admin",
+		title: "Manage Polls",
+		url: "/manage-polls",
+		icon: ClipboardList,
+		tag: "manager",
 	},
 	{
 		title: "Manage Users",
@@ -42,21 +42,21 @@ const items = [
 		tag: "admin",
 	},
 	{
-		title: "Manage Polls",
-		url: "/manage-polls",
-		icon: ClipboardList,
-		tag: "manager",
-	},
-	{
-		title: "Tickets",
+		title: "Manage Tickets",
 		url: "/tickets",
 		icon: Ticket,
-		tag: "user, manager",
+		tag: "admin",
 	},
 	{
 		title: "Polls",
 		url: "/polls",
 		icon: Clipboard,
+		tag: "user, manager",
+	},
+	{
+		title: "Tickets",
+		url: "/tickets",
+		icon: Ticket,
 		tag: "user, manager",
 	},
 ];

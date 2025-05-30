@@ -5,6 +5,7 @@ import { pollsInsertSchema, pollsOptionsTable, pollsParticipantsTable, pollsTabl
 import type { Variables } from "./auth";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
+import { seedTable } from "../db/schema/code-seed";
 
 const PollInsertSchema = z.object({
 	title: z.string().min(1),
@@ -17,6 +18,7 @@ const PollInsertSchema = z.object({
 		.string()
 		.refine((val) => !isNaN(Date.parse(val))),
 	managerIncluded: z.boolean(),
+	participantLimit: z.number().min(1),
 });
 
 export const pollsRoute = new Hono<{ Variables: Variables }>()
@@ -29,15 +31,28 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 
 		const pollid = Date.now().toString()
 
+		const pollCode = await db.transaction(async (tx) => {
+			const [row] = await tx.select().from(seedTable).limit(1);
+			if (!row) throw new Error("Seed row not found");
+
+			const currentSeed = row.seed;
+
+			await tx.update(seedTable).set({ seed: currentSeed + 1 });
+
+			return currentSeed;
+		})
+
 		const polldb = pollsInsertSchema.parse({
 			id: pollid,
 			creatorAddress: address,
 			title: poll.title,
 			description: poll.description,
+			participantLimit: poll.participantLimit,
+			accessCode: pollCode.toString().padStart(6, "0"),
 			startTime: new Date(),
 			endTime: new Date(poll.endTime)
 		})
-		
+
 		const responseCreate = await db
 			.insert(pollsTable)
 			.values(polldb)
@@ -58,7 +73,7 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 		} catch {
 			return c.text("Could not insert option into db")
 		}
-		
+
 		c.status(201);
 		return c.json(responseCreate);
 	})
@@ -88,11 +103,34 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 		const polls = await db
 			.select({ ...getTableColumns(pollsTable) })
 			.from(pollsTable)
-			.where(eq(pollsTable.creatorAddress, address));
+			.where(eq(pollsTable.creatorAddress, address))
 
-		if (polls.length === 0) return c.json({ error: "No polls found" }, 404);
+		if (!polls) return c.json({ error: "No polls found" }, 404);
 
 		return c.json(polls);
+	})
+	.post("/:id/close", async (c) => {
+		const payload = c.get("jwtPayload");
+
+		const address = payload.sub;
+
+		const pollId = c.req.param("id")
+
+		const result = await db
+			.update(pollsTable)
+			.set({ hasEndedPrematurely: true })
+			.where(
+				and(
+					eq(pollsTable.id, pollId),
+					eq(pollsTable.creatorAddress, address)
+				)
+			)
+			.returning();
+
+		if (result.length === 0) {
+			return c.json({ error: "Poll not found or not authorized" }, 404);
+		}
+		return c.json({ message: "Poll closed successfully" }, 200);
 	})
 	.get("/:id", async (c) => {
 		const payload = c.get("jwtPayload");
