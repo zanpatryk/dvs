@@ -1,41 +1,59 @@
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Popover,	PopoverContent,	PopoverTrigger } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { client } from "@/hono-client"
-import { apiCall } from "@/lib/api"
-import { queryClient } from "@/main"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { DialogClose } from "@radix-ui/react-dialog"
+import {
+	Form,
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { client } from "@/hono-client";
+import { apiCall } from "@/lib/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DialogClose } from "@radix-ui/react-dialog";
 import { CalendarIcon, CirclePlus, Plus, X } from "lucide-react";
-import { useFieldArray, useForm } from "react-hook-form"
+import { useFieldArray, useForm } from "react-hook-form";
 import { Calendar } from "@/components/ui/calendar";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { z } from "zod";
 import { cn, formatDate } from "@/lib/utils";
+import { queryClient } from "@/main";
 
 const FormSchema = z.object({
-    title: z.string().min(1, {
-        message: "Title cannot be empty",
-    }),
-    description: z.string(),
-    options: z
-        .array(z.object({ value: z.string().min(1, { message: "Option cannot be empty" }) }))
-        .min(1, { message: "At least one option is required" })
-        .max(10, { message: "You can add up to 10 options" }),
-    endTime: z
-        .string()
-        .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
-    managerIncluded: z.boolean(),
-    participantLimit: z.coerce.number().min(1, { message: "Participant limit must be at least 1" }),
+	title: z.string().min(1, {
+		message: "Title cannot be empty",
+	}),
+	description: z.string(),
+	options: z
+		.array(
+			z.object({
+				value: z.string().min(1, { message: "Option cannot be empty" }),
+			})
+		)
+		.min(1, { message: "At least one option is required" })
+		.max(10, { message: "You can add up to 10 options" }),
+	endTime: z
+		.string()
+		.refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
+	managerIncluded: z.boolean(),
+	participantLimit: z.coerce
+		.number()
+		.min(1, { message: "Participant limit must be at least 1" }),
 });
 
 const CreatePoll = () => {
 	type FormType = z.infer<typeof FormSchema>;
-  
+
 	const form = useForm<FormType>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -44,7 +62,7 @@ const CreatePoll = () => {
 			options: [{ value: "Option #1" }],
 			endTime: "",
 			managerIncluded: false,
-      participantLimit: 100,
+			participantLimit: 100,
 		},
 	});
 
@@ -58,7 +76,9 @@ const CreatePoll = () => {
 
 		const res = await apiCall(() => client.api.polls.$post({ json: data }));
 
-    // TODO: add toast here instead of throwing
+		queryClient.invalidateQueries({ queryKey: ["get-created-polls"] });
+
+		// TODO: add toast here instead of throwing
 		if (!res.ok) {
 			throw new Error(`Error ${res.status}`);
 		}
@@ -98,10 +118,7 @@ const CreatePoll = () => {
 						Please fill out the form to create a new poll.
 					</DialogDescription>
 				</div>
-
-				{/* Two column layout for title/description and endtime */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-					{/* Left column - Title and Description */}
 					<div className="space-y-4">
 						<FormField
 							control={form.control}
@@ -138,8 +155,6 @@ const CreatePoll = () => {
 							)}
 						/>
 					</div>
-
-					{/* Right column - End Time */}
 					<div className="space-y-4">
 						<FormField
 							control={form.control}
@@ -181,6 +196,7 @@ const CreatePoll = () => {
 														new Date(field.value)
 													}
 													onSelect={handleDateSelect}
+													fromDate={new Date()}
 													initialFocus
 												/>
 												<div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
@@ -271,37 +287,42 @@ const CreatePoll = () => {
 								</FormItem>
 							)}
 						/>
-            <FormField
-                    control={form.control}
-                    name="participantLimit"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Participant Limit</FormLabel>
-                            <FormControl>
-                                <Input type="number" min={1} {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-              />
-              <FormField
-                    control={form.control}
-                    name="managerIncluded"
-                    render={({ field }) => (
-                        <FormItem className="flex items-center space-x-2">
-                            <FormControl>
-                                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                            </FormControl>
-                            <FormLabel className="mb-0">
-                                Manager included as a participant
-                            </FormLabel>
-                        </FormItem>
-                    )}
-                />
+						<FormField
+							control={form.control}
+							name="participantLimit"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Participant Limit</FormLabel>
+									<FormControl>
+										<Input
+											type="number"
+											min={1}
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="managerIncluded"
+							render={({ field }) => (
+								<FormItem className="flex items-center space-x-2">
+									<FormControl>
+										<Checkbox
+											checked={field.value}
+											onCheckedChange={field.onChange}
+										/>
+									</FormControl>
+									<FormLabel className="mb-0">
+										Manager included as a participant
+									</FormLabel>
+								</FormItem>
+							)}
+						/>
 					</div>
 				</div>
-
-				{/* Options section - full width below */}
 				<div className="border-t pt-6">
 					<FormItem>
 						<FormLabel className="text-lg font-semibold">
@@ -371,8 +392,6 @@ const CreatePoll = () => {
 						</div>
 					</FormItem>
 				</div>
-
-				{/* Action buttons */}
 				<div className="flex space-x-4 justify-end pt-6 border-t">
 					{form.formState.isValid ? (
 						<>
