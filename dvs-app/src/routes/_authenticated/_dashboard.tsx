@@ -125,7 +125,9 @@ function HeaderActionButton({ action }: { action: DashboardHeaderAction }) {
 						{action.label}
 					</Button>
 				</DialogTrigger>
-				<DialogContent>{action.dialog}</DialogContent>
+				<DialogContent className="min-w-fit">
+					{action.dialog}
+				</DialogContent>
 			</Dialog>
 		);
 	}
