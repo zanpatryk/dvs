@@ -1,5 +1,11 @@
+import { CreatePollFormType } from "@/components/poll/create";
 import { client } from "@/hono-client";
-import { queryOptions } from "@tanstack/react-query";
+import {
+	queryOptions,
+	useMutation,
+	useQueryClient,
+} from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface ApiResponse {
 	ok: boolean;
@@ -105,3 +111,67 @@ export const pollQueryOptions = (pollId: string) =>
 		staleTime: Infinity,
 		retry: false,
 	});
+
+async function createPoll(poll: CreatePollFormType) {
+	const res = await apiCall(() => client.api.polls.$post({ json: poll }));
+
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error("error" in data ? data.error : `Error ${res.status}`);
+	}
+
+	return await res.json();
+}
+
+export const useCreatePollMutation = () => {
+	const queryClient = useQueryClient();
+	const mutation = useMutation({
+		mutationFn: createPoll,
+		onError: (error: Error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (_, variables) => {
+			toast.success("Poll created successfully");
+			if (variables.managerIncluded)
+				queryClient.invalidateQueries({
+					queryKey: ["get-created-polls"],
+				});
+			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+		},
+	});
+
+	return mutation;
+};
+
+async function endPoll(pollId: string) {
+	const res = await apiCall(() =>
+		client.api.polls[":id"].end.$patch({
+			param: {
+				id: pollId,
+			},
+		})
+	);
+
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error(`Failed to end poll: ${data.error}`);
+	}
+
+	return await res.json();
+}
+
+export const useEndPollMutation = (pollId: string) => {
+	const queryClient = useQueryClient();
+	const mutation = useMutation({
+		mutationFn: () => endPoll(pollId),
+		onError: (error: Error) => {
+			toast.error(error.message);
+		},
+		onSuccess: () => {
+			toast.success("Poll ended successfully");
+			queryClient.invalidateQueries({ queryKey: ["get-created-polls"] });
+			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+		},
+	});
+	return mutation;
+};
