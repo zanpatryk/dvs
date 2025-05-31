@@ -17,8 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { client } from "@/hono-client";
-import { apiCall } from "@/lib/api";
+import { useCreatePollMutation } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { CalendarIcon, CirclePlus, Plus, X } from "lucide-react";
@@ -27,9 +26,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { z } from "zod";
 import { cn, formatDate } from "@/lib/utils";
-import { queryClient } from "@/main";
 
-const FormSchema = z.object({
+const createPollFormSchema = z.object({
 	title: z.string().min(1, {
 		message: "Title cannot be empty",
 	}),
@@ -51,11 +49,11 @@ const FormSchema = z.object({
 		.min(1, { message: "Participant limit must be at least 1" }),
 });
 
-const CreatePoll = () => {
-	type FormType = z.infer<typeof FormSchema>;
+export type CreatePollFormType = z.infer<typeof createPollFormSchema>;
 
-	const form = useForm<FormType>({
-		resolver: zodResolver(FormSchema),
+const CreatePoll = () => {
+	const form = useForm<CreatePollFormType>({
+		resolver: zodResolver(createPollFormSchema),
 		defaultValues: {
 			title: "",
 			description: "",
@@ -71,17 +69,12 @@ const CreatePoll = () => {
 		name: "options",
 	});
 
-	async function onSubmit(data: FormType) {
-		console.log(JSON.stringify(data, null, 2));
+	const mutation = useCreatePollMutation();
 
-		const res = await apiCall(() => client.api.polls.$post({ json: data }));
-
-		queryClient.invalidateQueries({ queryKey: ["get-created-polls"] });
-
-		// TODO: add toast here instead of throwing
-		if (!res.ok) {
-			throw new Error(`Error ${res.status}`);
-		}
+	async function onSubmit(data: CreatePollFormType) {
+		mutation.mutate({
+			...data,
+		});
 	}
 
 	function handleDateSelect(date: Date | undefined) {
@@ -166,6 +159,7 @@ const CreatePoll = () => {
 										<PopoverTrigger asChild>
 											<FormControl>
 												<Button
+													type="button"
 													variant={"outline"}
 													className={cn(
 														"w-full pl-3 text-left font-normal",
@@ -209,6 +203,7 @@ const CreatePoll = () => {
 																.reverse()
 																.map((hour) => (
 																	<Button
+																		type="button"
 																		key={
 																			hour
 																		}
@@ -246,6 +241,7 @@ const CreatePoll = () => {
 																(_, i) => i * 5
 															).map((minute) => (
 																<Button
+																	type="button"
 																	key={minute}
 																	size="icon"
 																	variant={
