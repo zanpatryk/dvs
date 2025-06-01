@@ -1,6 +1,10 @@
+import { Form, FormField } from '@/components/ui/form';
 import { UserRole } from '@/routes/_authenticated/_dashboard';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 export const Route = createFileRoute(
     '/_authenticated/_dashboard/dashboard/users',
@@ -8,17 +12,33 @@ export const Route = createFileRoute(
     component: RouteComponent,
 })
 
+const formSchema = z.object({
+    address: z.string().min(1, 'Address is required'),
+    role: z.nativeEnum(UserRole, {
+        errorMap: (issue, ctx) => {
+            if (issue.code === 'invalid_type') {
+                return { message: 'Invalid role selected' };
+            }
+            return { message: ctx.defaultError };
+        }
+    }),
+});
+
 function RouteComponent() {
     const [address, setAddress] = useState("");
     const [role, setRole] = useState<UserRole>(UserRole.User);
     const [submitting, setSubmitting] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setSubmitting(true);
-        // Replace this with actual backend call
-        console.log("Updating role:", { address, role });
-        setTimeout(() => setSubmitting(false), 1000); // Simulate async
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            address: '',
+            role: UserRole.User,
+        },
+    });
+
+    const handleSubmit = (data: z.infer<typeof formSchema>) => {
+        console.log("Updating role:", data);
     };
 
     return (
@@ -31,43 +51,65 @@ function RouteComponent() {
             </div>
 
             {/* Main Content Section */}
-            <form
-                className="max-w-md bg-white rounded shadow p-6 flex flex-col gap-4"
-                onSubmit={handleSubmit}
-            >
-                <label className="flex flex-col gap-1">
-                    <span className="font-medium">Wallet Address</span>
-                    <input
-                        type="text"
-                        value={address}
-                        onChange={e => setAddress(e.target.value)}
-                        className="border rounded px-3 py-2"
-                        placeholder="0x..."
-                        required
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleSubmit)}>
+                    <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700 mb-1">User Address</label>
+                                <input
+                                    type="text"
+                                    {...field}
+                                    value={field.value}
+                                    onChange={(e) => {
+                                        field.onChange(e.target.value);
+                                        setAddress(e.target.value);
+                                    }}
+                                    className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="0xe621324665fbb008bef14ffaff85029d5dddc61d"
+                                />
+                            </div>
+                        )}
                     />
-                </label>
-                <label className="flex flex-col gap-1">
-                    <span className="font-medium">Role</span>
-                    <select
-                        value={role}
-                        onChange={e => setRole(e.target.value as UserRole)}
-                        className="border rounded px-3 py-2"
-                    >
-                        {Object.values(UserRole).map(r => (
-                            <option key={r} value={r}>
-                                {r.charAt(0).toUpperCase() + r.slice(1)}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <button
-                    type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-                    disabled={submitting}
-                >
-                    {submitting ? "Updating..." : "Update Role"}
-                </button>
-            </form>
+                    <FormField
+                        control={form.control}
+                        name="role"
+                        render={({ field }) => (
+                            <div className="flex flex-col mt-4">
+                                <label className="text-sm font-medium text-gray-700 mb-1">User Role</label>
+                                <select
+                                    {...field}
+                                    value={field.value}
+                                    onChange={(e) => {
+                                        field.onChange(e.target.value as UserRole);
+                                        setRole(e.target.value as UserRole);
+                                    }}
+                                    className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    {Object.values(UserRole).map((role) => (
+                                        <option key={role} value={role}>
+                                            {role}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                    />
+                    <div className="mt-6">
+                        <button
+                            type="submit"
+                            disabled={submitting}
+                            className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                submitting ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                        >
+                            {submitting ? 'Updating...' : 'Update Role'}
+                        </button>
+                    </div>
+                </form>
+            </Form>
         </div>
     )
 }
