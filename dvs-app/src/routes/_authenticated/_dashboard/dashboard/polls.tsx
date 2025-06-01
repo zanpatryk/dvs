@@ -80,13 +80,13 @@ function RouteComponent() {
 	const activePolls =
 		data?.filter((poll) => {
 			const endTime = poll.endTime ? new Date(poll.endTime) : null;
-			return !endTime || endTime.getTime() > Date.now();
+			return (!endTime || endTime.getTime() > Date.now()) && !poll.hasEndedPrematurely;
 		}) || [];
 
 	const completedPolls =
 		data?.filter((poll) => {
 			const endTime = poll.endTime ? new Date(poll.endTime) : null;
-			return endTime && endTime.getTime() <= Date.now();
+			return (endTime && endTime.getTime() <= Date.now()) || poll.hasEndedPrematurely;
 		}) || [];
 
 	return (

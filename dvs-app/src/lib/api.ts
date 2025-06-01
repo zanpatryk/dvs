@@ -135,9 +135,9 @@ export const useCreatePollMutation = () => {
 			toast.success("Poll created successfully");
 			if (variables.managerIncluded)
 				queryClient.invalidateQueries({
-					queryKey: ["get-created-polls"],
+					queryKey: ["get-polls"],
 				});
-			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+			queryClient.invalidateQueries({ queryKey: ["get-created-polls"] });
 		},
 	});
 
