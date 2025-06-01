@@ -19,6 +19,7 @@ import { Route as IndexAboutImport } from './routes/_index/about'
 import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/_dashboard'
 import { Route as AuthenticatedDashboardDashboardTicketsImport } from './routes/_authenticated/_dashboard/dashboard/tickets'
 import { Route as AuthenticatedDashboardDashboardPollsImport } from './routes/_authenticated/_dashboard/dashboard/polls'
+import { Route as AuthenticatedDashboardDashboardManageTicketsImport } from './routes/_authenticated/_dashboard/dashboard/manage-tickets'
 import { Route as AuthenticatedDashboardDashboardManagePollsImport } from './routes/_authenticated/_dashboard/dashboard/manage-polls'
 
 // Create/Update Routes
@@ -67,6 +68,13 @@ const AuthenticatedDashboardDashboardPollsRoute =
   AuthenticatedDashboardDashboardPollsImport.update({
     id: '/dashboard/polls',
     path: '/dashboard/polls',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardManageTicketsRoute =
+  AuthenticatedDashboardDashboardManageTicketsImport.update({
+    id: '/dashboard/manage-tickets',
+    path: '/dashboard/manage-tickets',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
 
@@ -130,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardDashboardManagePollsImport
       parentRoute: typeof AuthenticatedDashboardImport
     }
+    '/_authenticated/_dashboard/dashboard/manage-tickets': {
+      id: '/_authenticated/_dashboard/dashboard/manage-tickets'
+      path: '/dashboard/manage-tickets'
+      fullPath: '/dashboard/manage-tickets'
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardManageTicketsImport
+      parentRoute: typeof AuthenticatedDashboardImport
+    }
     '/_authenticated/_dashboard/dashboard/polls': {
       id: '/_authenticated/_dashboard/dashboard/polls'
       path: '/dashboard/polls'
@@ -151,6 +166,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardDashboardManagePollsRoute: typeof AuthenticatedDashboardDashboardManagePollsRoute
+  AuthenticatedDashboardDashboardManageTicketsRoute: typeof AuthenticatedDashboardDashboardManageTicketsRoute
   AuthenticatedDashboardDashboardPollsRoute: typeof AuthenticatedDashboardDashboardPollsRoute
   AuthenticatedDashboardDashboardTicketsRoute: typeof AuthenticatedDashboardDashboardTicketsRoute
 }
@@ -159,6 +175,8 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardDashboardManagePollsRoute:
       AuthenticatedDashboardDashboardManagePollsRoute,
+    AuthenticatedDashboardDashboardManageTicketsRoute:
+      AuthenticatedDashboardDashboardManageTicketsRoute,
     AuthenticatedDashboardDashboardPollsRoute:
       AuthenticatedDashboardDashboardPollsRoute,
     AuthenticatedDashboardDashboardTicketsRoute:
@@ -202,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof IndexContactRoute
   '/': typeof IndexIndexRoute
   '/dashboard/manage-polls': typeof AuthenticatedDashboardDashboardManagePollsRoute
+  '/dashboard/manage-tickets': typeof AuthenticatedDashboardDashboardManageTicketsRoute
   '/dashboard/polls': typeof AuthenticatedDashboardDashboardPollsRoute
   '/dashboard/tickets': typeof AuthenticatedDashboardDashboardTicketsRoute
 }
@@ -212,6 +231,7 @@ export interface FileRoutesByTo {
   '/contact': typeof IndexContactRoute
   '/': typeof IndexIndexRoute
   '/dashboard/manage-polls': typeof AuthenticatedDashboardDashboardManagePollsRoute
+  '/dashboard/manage-tickets': typeof AuthenticatedDashboardDashboardManageTicketsRoute
   '/dashboard/polls': typeof AuthenticatedDashboardDashboardPollsRoute
   '/dashboard/tickets': typeof AuthenticatedDashboardDashboardTicketsRoute
 }
@@ -225,6 +245,7 @@ export interface FileRoutesById {
   '/_index/contact': typeof IndexContactRoute
   '/_index/': typeof IndexIndexRoute
   '/_authenticated/_dashboard/dashboard/manage-polls': typeof AuthenticatedDashboardDashboardManagePollsRoute
+  '/_authenticated/_dashboard/dashboard/manage-tickets': typeof AuthenticatedDashboardDashboardManageTicketsRoute
   '/_authenticated/_dashboard/dashboard/polls': typeof AuthenticatedDashboardDashboardPollsRoute
   '/_authenticated/_dashboard/dashboard/tickets': typeof AuthenticatedDashboardDashboardTicketsRoute
 }
@@ -237,6 +258,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/'
     | '/dashboard/manage-polls'
+    | '/dashboard/manage-tickets'
     | '/dashboard/polls'
     | '/dashboard/tickets'
   fileRoutesByTo: FileRoutesByTo
@@ -246,6 +268,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/'
     | '/dashboard/manage-polls'
+    | '/dashboard/manage-tickets'
     | '/dashboard/polls'
     | '/dashboard/tickets'
   id:
@@ -257,6 +280,7 @@ export interface FileRouteTypes {
     | '/_index/contact'
     | '/_index/'
     | '/_authenticated/_dashboard/dashboard/manage-polls'
+    | '/_authenticated/_dashboard/dashboard/manage-tickets'
     | '/_authenticated/_dashboard/dashboard/polls'
     | '/_authenticated/_dashboard/dashboard/tickets'
   fileRoutesById: FileRoutesById
@@ -305,6 +329,7 @@ export const routeTree = rootRoute
       "parent": "/_authenticated",
       "children": [
         "/_authenticated/_dashboard/dashboard/manage-polls",
+        "/_authenticated/_dashboard/dashboard/manage-tickets",
         "/_authenticated/_dashboard/dashboard/polls",
         "/_authenticated/_dashboard/dashboard/tickets"
       ]
@@ -323,6 +348,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/_dashboard/dashboard/manage-polls": {
       "filePath": "_authenticated/_dashboard/dashboard/manage-polls.tsx",
+      "parent": "/_authenticated/_dashboard"
+    },
+    "/_authenticated/_dashboard/dashboard/manage-tickets": {
+      "filePath": "_authenticated/_dashboard/dashboard/manage-tickets.tsx",
       "parent": "/_authenticated/_dashboard"
     },
     "/_authenticated/_dashboard/dashboard/polls": {
