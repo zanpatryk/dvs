@@ -119,7 +119,8 @@ function RouteComponent() {
 					<div className="flex-1 overflow-y-auto space-y-4 pr-2">
 						{isPending ? (
 							<LoadingSkeleton />
-						) : !error?.message.includes("No polls found") ? (
+						) : error !== null &&
+						  !error.message.includes("No polls found") ? (
 							<div className="text-center py-8 text-red-600">
 								Failed to load polls. Please try again.
 							</div>
@@ -165,7 +166,8 @@ function RouteComponent() {
 					<div className="flex-1 overflow-y-auto space-y-4 pr-2">
 						{isPending ? (
 							<LoadingSkeleton />
-						) : !error?.message.includes("No polls found") ? (
+						) : error !== null &&
+						  !error.message.includes("No polls found") ? (
 							<div className="text-center py-8 text-red-600">
 								Failed to load polls. Please try again.
 							</div>

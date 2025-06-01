@@ -1,10 +1,9 @@
 import ViewTicketResponse from "@/components/ticket/response";
 import ViewTicket from "@/components/ticket/view";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Ticket } from "@/dummy/data";
 import { formatDate } from "@/lib/utils";
-import { DialogTrigger } from "@radix-ui/react-dialog";
 import { ColumnDef } from "@tanstack/react-table";
 import { FileSearch } from "lucide-react";
 

@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 
@@ -11,8 +12,9 @@ export const Route = createRootRouteWithContext<QueryContext>()({
 
 function Root() {
 	return (
-		<div>
+		<>
 			<Outlet />
-		</div>
+			<Toaster richColors />
+		</>
 	);
 }

@@ -1,12 +1,12 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
+import {
+	DialogClose,
+	DialogDescription,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import {
 	Form,
 	FormControl,
-	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
@@ -17,10 +17,12 @@ import {
 	InputOTPGroup,
 	InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { useJoinPollMutation } from "@/lib/api";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { DialogClose } from "@/components/ui/dialog";
 import { CirclePlus } from "lucide-react";
-import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const FormSchema = z.object({
 	code: z.string().min(6, {
@@ -29,6 +31,7 @@ const FormSchema = z.object({
 });
 
 const JoinPoll = () => {
+	const mutation = useJoinPollMutation();
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -37,7 +40,7 @@ const JoinPoll = () => {
 	});
 
 	function onSubmit(data: z.infer<typeof FormSchema>) {
-		console.log(JSON.stringify(data, null, 2));
+		mutation.mutate(data.code);
 	}
 
 	return (
@@ -46,22 +49,21 @@ const JoinPoll = () => {
 				onSubmit={form.handleSubmit(onSubmit)}
 				className="w-2/3 space-y-6"
 			>
+				<div className="flex flex-col gap-2">
+					<DialogTitle className="text-2xl font-bold">
+						Join Poll
+					</DialogTitle>
+					<DialogDescription>
+						Please enter the one-time code provided by the poll
+						creator.
+					</DialogDescription>
+				</div>
 				<FormField
 					control={form.control}
 					name="code"
 					render={({ field }) => (
 						<FormItem>
-							<DialogTitle>
-								<FormLabel className="text-2xl font-bold">
-									Join Poll
-								</FormLabel>
-							</DialogTitle>
-							<DialogDescription>
-								<FormDescription>
-									Please enter the one-time code provided by
-									the poll creator.
-								</FormDescription>
-							</DialogDescription>
+							<FormLabel>Code</FormLabel>
 							<FormControl>
 								<InputOTP
 									maxLength={6}
@@ -88,8 +90,10 @@ const JoinPoll = () => {
 							type="submit"
 							className="bg-green-500 hover:bg-green-600"
 						>
+							{/* <Vote />
+							Vote */}
 							<CirclePlus />
-							Vote
+							Join
 						</Button>
 					</DialogClose>
 				) : (
@@ -97,8 +101,10 @@ const JoinPoll = () => {
 						className="bg-green-500 hover:bg-green-600"
 						disabled
 					>
+						{/* <Vote />
+						Vote */}
 						<CirclePlus />
-						Vote
+						Join
 					</Button>
 				)}
 			</form>

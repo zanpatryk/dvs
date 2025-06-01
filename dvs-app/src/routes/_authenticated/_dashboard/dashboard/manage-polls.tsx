@@ -1,9 +1,9 @@
+import CreatePoll from "@/components/poll/create";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import CreatePoll from "@/components/poll/create";
 import { createdPollsQueryOptions } from "@/lib/api";
-import { columns } from "@/polls/columns";
-import { DataTable } from "@/polls/data-table";
+import { columns } from "@/manage-polls-table/columns";
+import { DataTable } from "@/manage-polls-table/data-table";
 import { DashboardHeaderAction } from "@/routes/_authenticated/_dashboard";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -94,7 +94,8 @@ function RouteComponent() {
 					<CardContent className="h-full flex flex-col">
 						{isPending ? (
 							<LoadingSkeleton />
-						) : !error?.message.includes("No polls found") && error !== null? (
+						) : error !== null &&
+						  !error.message.includes("No polls found") ? (
 							<div className="flex flex-col items-center justify-center py-12 text-center">
 								<div className="text-red-600 mb-4">
 									Error loading polls
