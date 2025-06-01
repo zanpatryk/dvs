@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { pollsQueryOptions } from "@/lib/api";
 import { DashboardHeaderAction } from "@/routes/_authenticated/_dashboard";
-import { PollCard } from "@/components/dashboard/poll-card";
+import { PollCard } from "@/components/poll/poll-card";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -142,6 +142,7 @@ function RouteComponent() {
 											: undefined
 									}
 									isActive={true}
+									hasVoted={false} // TODO: Replace with actual voting status
 								/>
 							))
 						)}
@@ -189,6 +190,7 @@ function RouteComponent() {
 											: undefined
 									}
 									isActive={false}
+									hasVoted={false} // TODO: Replace with actual voting status
 								/>
 							))
 						)}

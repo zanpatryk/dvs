@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { CircleCheckBig, Clock, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -14,6 +15,7 @@ interface PollCardProps {
 	description: string;
 	endDate?: Date;
 	isActive?: boolean;
+	hasVoted: boolean;
 	participantCount?: number;
 }
 
@@ -23,6 +25,7 @@ export function PollCard({
 	description,
 	endDate,
 	isActive = true,
+	hasVoted = false,
 }: PollCardProps) {
 	const [timeRemaining, setTimeRemaining] = useState({
 		days: 0,
@@ -74,19 +77,16 @@ export function PollCard({
 		if (timeRemaining.days > 0) parts.push(`${timeRemaining.days}d`);
 		if (timeRemaining.hours > 0) parts.push(`${timeRemaining.hours}h`);
 		if (timeRemaining.minutes > 0) parts.push(`${timeRemaining.minutes}m`);
-		if (parts.length === 0 && timeRemaining.seconds > 0)
+		if (timeRemaining.hours == 0 && timeRemaining.seconds > 0)
 			parts.push(`${timeRemaining.seconds}s`);
 
 		return parts.join(" ") || "Less than 1s";
 	};
 
-	const isExpired = endDate ? endDate.getTime() <= Date.now() : false;
-
 	return (
 		<Card
 			className={cn(
-				"group transition-all duration-200",
-				isExpired && "opacity-75"
+				"group transition-all duration-200"
 			)}
 		>
 			<CardHeader className="pb-3">
@@ -96,16 +96,16 @@ export function PollCard({
 					</CardTitle>
 					<Badge
 						variant={
-							isActive && !isExpired ? "default" : "secondary"
+							isActive ? "default" : "secondary"
 						}
 						className={cn(
 							"ml-2 flex-shrink-0",
-							isActive &&
-								!isExpired &&
-								"bg-green-100 text-green-800"
+							isActive ?
+								"bg-green-100 text-green-800" :
+								"bg-gray-200 text-gray-800"
 						)}
 					>
-						{isActive && !isExpired ? "Active" : "Completed"}
+						{isActive ? "Active" : "Completed"}
 					</Badge>
 				</div>
 				<p className="text-sm text-muted-foreground line-clamp-2 mt-2">
@@ -116,50 +116,87 @@ export function PollCard({
 			<CardContent className="pt-0">
 				<div className="space-y-4">
 					{/* Countdown Timer */}
-					{endDate && isActive && !isExpired && (
-						<div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+					{endDate && isActive ? (
+						<div className="flex items-center gap-2 p-3 bg-blue-100 rounded-lg">
 							<Clock className="h-4 w-4 text-blue-600" />
 							<span className="text-sm font-medium text-blue-900">
 								Voting ends in: {formatTimeRemaining()}
 							</span>
 						</div>
-					)}
+					) :
+						(
+							<div className="flex items-center gap-2 p-3 bg-gray-200 rounded-lg">
+								<TrendingUp className="h-4 w-4 text-gray-600" />
+								<span className="text-sm font-medium text-gray-700">
+									Voting has ended
+								</span>
+							</div>
+						)
+					}
 
-					{isExpired && (
-						<div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-							<TrendingUp className="h-4 w-4 text-gray-600" />
-							<span className="text-sm font-medium text-gray-700">
-								Voting has ended
-							</span>
-						</div>
-					)}
 
 					<Separator />
 
 					{/* Action Button */}
 					<Dialog>
 						<DialogTrigger asChild>
-							<Button
-								className={cn(
-									"w-full",
-									isActive && !isExpired
-										? "bg-blue-600 hover:bg-blue-700"
-										: "bg-gray-600 hover:bg-gray-700"
-								)}
-								disabled={isExpired}
-							>
-								{isActive && !isExpired ? (
-									<>
-										<CircleCheckBig className="mr-2 h-4 w-4" />
-										Vote Now
-									</>
-								) : (
-									<>
-										<TrendingUp className="mr-2 h-4 w-4" />
-										View Results
-									</>
-								)}
-							</Button>
+							{hasVoted && isActive ? (
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<span tabIndex={0}>
+												<Button
+													className={cn(
+														"w-full",
+														isActive
+															? "bg-blue-600 hover:bg-blue-700"
+															: "bg-gray-600 hover:bg-gray-700"
+													)}
+													disabled={hasVoted && isActive}
+													tabIndex={-1}
+												>
+													{isActive ? (
+														<>
+															<CircleCheckBig className="mr-2 h-4 w-4" />
+															Vote Now
+														</>
+													) : (
+														<>
+															<TrendingUp className="mr-2 h-4 w-4" />
+															View Results
+														</>
+													)}
+												</Button>
+											</span>
+										</TooltipTrigger>
+										<TooltipContent>
+											You have already voted in this poll
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+							) : (
+								<Button
+									className={cn(
+										"w-full",
+										isActive
+											? "bg-blue-600 hover:bg-blue-700"
+											: "bg-gray-600 hover:bg-gray-700"
+									)}
+									disabled={hasVoted && isActive}
+								>
+									{isActive ? (
+										<>
+											<CircleCheckBig className="mr-2 h-4 w-4" />
+											Vote Now
+										</>
+									) : (
+										<>
+											<TrendingUp className="mr-2 h-4 w-4" />
+											View Results
+										</>
+									)}
+								</Button>
+							)}
 						</DialogTrigger>
 						<DialogContent>
 							<VotePoll pollId={id} />

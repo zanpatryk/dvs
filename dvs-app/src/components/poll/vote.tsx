@@ -19,10 +19,9 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
-import { pollDetailsQueryOptions } from "@/lib/api";
+import { pollDetailsQueryOptions, useVotePollMutation } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { Vote } from "lucide-react";
-import { toast } from "sonner";
 
 function LoadingSkeleton() {
 	return (
@@ -71,6 +70,8 @@ const VotePoll = ({ pollId }: { pollId: string }) => {
 		data: poll,
 	} = useQuery(pollDetailsQueryOptions(pollId));
 
+	const mutation = useVotePollMutation();
+
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -87,9 +88,9 @@ const VotePoll = ({ pollId }: { pollId: string }) => {
 	}
 
 	function onSubmit(data: z.infer<typeof FormSchema>) {
-		toast.success(
-			`You voted for option ${poll?.options.find((o) => o.id === data.option)?.value}`
-		);
+		mutation.mutate({
+			pollId: pollId,
+			vote: data.option.toString(),})
 	}
 
 	return (

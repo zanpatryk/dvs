@@ -144,6 +144,28 @@ export const useCreatePollMutation = () => {
 	return mutation;
 };
 
+async function votePoll({ pollId, vote }: { pollId: string; vote: string }) {
+	console.log("Voting on poll:", pollId, "with vote:", vote);
+}
+
+export const useVotePollMutation = () => {
+	const queryClient = useQueryClient();
+	const mutation = useMutation({
+		mutationFn: votePoll,
+		onError: (error: Error) => {
+			toast.error(error.message);
+		},
+		onSuccess: () => {
+			toast.success("Vote cast successfully");
+			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+		},
+	});
+
+	return mutation;
+};
+
+
+
 async function joinPoll(code: string) {
 	const res = await apiCall(() =>
 		client.api.polls.join.$patch({
