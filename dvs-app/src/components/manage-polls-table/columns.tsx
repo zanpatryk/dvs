@@ -1,3 +1,4 @@
+import { EndPollButton } from "@/components/manage-polls-table/end-poll-button";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -7,7 +8,6 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/utils";
-import { EndPollButton } from "@/manage-polls-table/end-poll-button";
 import { ColumnDef } from "@tanstack/react-table";
 import { FileSearch } from "lucide-react";
 

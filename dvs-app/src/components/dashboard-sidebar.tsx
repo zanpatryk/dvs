@@ -37,13 +37,13 @@ const items = [
 	},
 	{
 		title: "Manage Users",
-		url: "/users",
+		url: "/manage-users",
 		icon: User,
 		tag: "admin",
 	},
 	{
 		title: "Manage Tickets",
-		url: "/tickets",
+		url: "/manage-tickets",
 		icon: Ticket,
 		tag: "admin",
 	},
@@ -51,12 +51,6 @@ const items = [
 		title: "Polls",
 		url: "/polls",
 		icon: Clipboard,
-		tag: "user, manager",
-	},
-	{
-		title: "Tickets",
-		url: "/tickets",
-		icon: Ticket,
 		tag: "user, manager",
 	},
 ];
@@ -138,17 +132,34 @@ export function DashboardSidebar({ role }: { role: UserRole }) {
 				<SidebarGroup>
 					<SidebarGroupContent>
 						<SidebarMenu>
-							<SidebarMenuItem>
-								<Dialog>
-									<DialogTrigger asChild>
-										<SidebarMenuButton className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5">
-											<TriangleAlert /> Report an issue
+							{role !== UserRole.Admin && (
+								<>
+									<Dialog>
+										<DialogTrigger asChild>
+											<SidebarMenuItem>
+												<SidebarMenuButton className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5">
+													<TriangleAlert /> Report an
+													issue
+												</SidebarMenuButton>
+											</SidebarMenuItem>
+										</DialogTrigger>
+										<DialogContent>
+											<CreateTicket />
+										</DialogContent>
+									</Dialog>
+									<SidebarMenuItem>
+										<SidebarMenuButton
+											asChild
+											className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5"
+										>
+											<Link to="/dashboard/tickets">
+												<Ticket /> My Tickets
+											</Link>
 										</SidebarMenuButton>
-									</DialogTrigger>
-									<DialogContent>
-										<CreateTicket />
-									</DialogContent>
-								</Dialog>
+									</SidebarMenuItem>
+								</>
+							)}
+							<SidebarMenuItem>
 								<SidebarMenuButton
 									className="hover:bg-blue-600 hover:text-white text-lg font-medium [&>svg]:size-5"
 									onClick={() => logout()}

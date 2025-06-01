@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
-import { logger } from "hono/logger";
-import { healthRoute } from "./routes/health";
-import { ticketsRoute } from "./routes/tickets";
-import { authRoute, meRoute } from "./routes/auth";
 import { jwt } from "hono/jwt";
+import { logger } from "hono/logger";
+import { authRoute, meRoute } from "./routes/auth";
+import { healthRoute } from "./routes/health";
 import { pollsRoute } from "./routes/polls";
+import { ticketsRoute } from "./routes/tickets";
 
 const app = new Hono();
 

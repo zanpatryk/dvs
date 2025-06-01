@@ -4,6 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
 	DialogClose,
 	DialogDescription,
+	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -106,14 +107,14 @@ const CreatePoll = () => {
 				onSubmit={form.handleSubmit(onSubmit)}
 				className="w-full max-w-4xl space-y-6"
 			>
-				<div className="flex flex-col gap-2">
+				<DialogHeader>
 					<DialogTitle className="text-2xl font-bold">
 						Create Poll
 					</DialogTitle>
 					<DialogDescription>
 						Please fill out the form to create a new poll.
 					</DialogDescription>
-				</div>
+				</DialogHeader>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					<div className="space-y-4">
 						<FormField
@@ -393,41 +394,31 @@ const CreatePoll = () => {
 				</div>
 				<div className="flex space-x-4 justify-end pt-6 border-t">
 					{form.formState.isValid ? (
-						<>
-							<DialogClose asChild>
-								<Button
-									type="submit"
-									className="bg-green-500 hover:bg-green-600"
-								>
-									<CirclePlus className="mr-2" size={16} />
-									Create Poll
-								</Button>
-							</DialogClose>
-							<DialogClose asChild>
-								<Button variant="outline">
-									<X className="mr-2" size={16} />
-									Cancel
-								</Button>
-							</DialogClose>
-						</>
-					) : (
-						<>
+						<DialogClose asChild>
 							<Button
-								disabled
 								type="submit"
 								className="bg-green-500 hover:bg-green-600"
 							>
-								<CirclePlus className="mr-2" size={16} />
+								<CirclePlus />
 								Create Poll
 							</Button>
-							<DialogClose asChild>
-								<Button variant="outline">
-									<X className="mr-2" size={16} />
-									Cancel
-								</Button>
-							</DialogClose>
-						</>
+						</DialogClose>
+					) : (
+						<Button
+							disabled
+							type="submit"
+							className="bg-green-500 hover:bg-green-600"
+						>
+							<CirclePlus />
+							Create Poll
+						</Button>
 					)}
+					<DialogClose asChild>
+						<Button className="bg-red-500 hover:bg-red-600">
+							<X />
+							Cancel
+						</Button>
+					</DialogClose>
 				</div>
 			</form>
 		</Form>

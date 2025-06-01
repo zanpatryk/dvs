@@ -1,9 +1,10 @@
-import { TicketsData } from "@/dummy/data";
-import { columns } from "@/tickets/columns";
-import { DataTable } from "@/tickets/data-table";
-import { createFileRoute } from "@tanstack/react-router";
+import { columns } from "@/components/tickets-table/columns";
+import { DataTable } from "@/components/tickets-table/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { myTicketsQueryOptions } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { FolderOpen } from "lucide-react";
 
 export const Route = createFileRoute(
@@ -63,10 +64,7 @@ function LoadingSkeleton() {
 }
 
 function RouteComponent() {
-	// TODO: add loading/error states here
-	const isLoading = false;
-	const isError = null;
-	const data = TicketsData;
+	const { isPending, error, data } = useQuery(myTicketsQueryOptions);
 
 	return (
 		<div className="h-full flex flex-col">
@@ -82,9 +80,10 @@ function RouteComponent() {
 			<div className="flex-initial min-h-0">
 				<Card className="h-full">
 					<CardContent className="p-6 h-full flex flex-col">
-						{isLoading ? (
+						{isPending ? (
 							<LoadingSkeleton />
-						) : isError ? (
+						) : error !== null &&
+						  !error.message.includes("No tickets found") ? (
 							<div className="flex flex-col items-center justify-center py-12 text-center">
 								<div className="text-red-600 mb-4">
 									Error loading tickets
@@ -98,7 +97,13 @@ function RouteComponent() {
 							<EmptyState />
 						) : (
 							<div className="flex-1 overflow-hidden px-2">
-								<DataTable columns={columns} data={data} />
+								<DataTable
+									columns={columns}
+									data={data.map((ticket) => ({
+										...ticket,
+										createdAt: new Date(ticket.createdAt),
+									}))}
+								/>
 							</div>
 						)}
 					</CardContent>

@@ -1,11 +1,10 @@
-import ViewTicketResponse from "@/components/ticket/response";
 import ViewTicket from "@/components/ticket/view";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Ticket } from "@/dummy/data";
 import { formatDate } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { FileSearch } from "lucide-react";
+import { Ticket } from "../../../../backend/src/db/schema/tickets";
 
 export const columns: ColumnDef<Ticket>[] = [
 	{
@@ -32,12 +31,12 @@ export const columns: ColumnDef<Ticket>[] = [
 			return (
 				<p
 					className={
-						status === "Resolved"
+						status === "resolved"
 							? "text-green-500"
 							: "text-yellow-500"
 					}
 				>
-					{status}
+					{status.charAt(0).toUpperCase() + status.slice(1)}
 				</p>
 			);
 		},
@@ -52,9 +51,8 @@ export const columns: ColumnDef<Ticket>[] = [
 		id: "actions",
 		cell: ({ row }) => {
 			const ticketId = row.getValue("id") as string;
-			const status = row.getValue("status") as string;
 
-			return status === "Pending" ? (
+			return (
 				<Dialog>
 					<DialogTrigger asChild>
 						<Button
@@ -65,23 +63,8 @@ export const columns: ColumnDef<Ticket>[] = [
 							View
 						</Button>
 					</DialogTrigger>
-					<DialogContent>
+					<DialogContent className="min-w-fit">
 						<ViewTicket ticketId={ticketId} />
-					</DialogContent>
-				</Dialog>
-			) : (
-				<Dialog>
-					<DialogTrigger asChild>
-						<Button
-							size="sm"
-							className="bg-green-500 hover:bg-green-600"
-						>
-							<FileSearch />
-							View Response
-						</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<ViewTicketResponse ticketId={ticketId} />
 					</DialogContent>
 				</Dialog>
 			);

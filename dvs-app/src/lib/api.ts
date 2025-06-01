@@ -14,7 +14,7 @@ interface ApiResponse {
 	json(): Promise<any>;
 }
 
-export async function apiCall<T extends ApiResponse>(
+async function apiCall<T extends ApiResponse>(
 	fn: () => Promise<T>
 ): Promise<T> {
 	const res = await fn();
@@ -88,7 +88,7 @@ export const createdPollsQueryOptions = queryOptions({
 	retry: false,
 });
 
-async function getPoll(pollId: string) {
+async function getPollDetails(pollId: string) {
 	const res = await apiCall(() =>
 		client.api.polls[":id"].$get({
 			param: {
@@ -108,7 +108,7 @@ async function getPoll(pollId: string) {
 export const pollDetailsQueryOptions = (pollId: string) =>
 	queryOptions({
 		queryKey: ["get-poll-details", pollId],
-		queryFn: () => getPoll(pollId),
+		queryFn: () => getPollDetails(pollId),
 		staleTime: Infinity,
 		retry: false,
 	});
@@ -227,5 +227,127 @@ export const useEndPollMutation = (pollId: string) => {
 			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
 		},
 	});
+	return mutation;
+};
+
+async function getTickets() {
+	const res = await apiCall(() => client.api.tickets.$get());
+
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error("error" in data ? data.error : `Error ${res.status}`);
+	}
+
+	return await res.json();
+}
+
+export const ticketsQueryOptions = queryOptions({
+	queryKey: ["get-tickets"],
+	queryFn: getTickets,
+	staleTime: Infinity,
+	retry: false,
+});
+
+async function getMyTickets() {
+	const res = await apiCall(() => client.api.tickets.my.$get());
+
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error("error" in data ? data.error : `Error ${res.status}`);
+	}
+
+	return await res.json();
+}
+
+export const myTicketsQueryOptions = queryOptions({
+	queryKey: ["get-my-tickets"],
+	queryFn: getMyTickets,
+	staleTime: Infinity,
+	retry: false,
+});
+
+async function getTicketDetails(ticketId: string) {
+	const res = await apiCall(() =>
+		client.api.tickets[":id"].$get({
+			param: {
+				id: ticketId,
+			},
+		})
+	);
+
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error("error" in data ? data.error : `Error ${res.status}`);
+	}
+
+	return await res.json();
+}
+
+export const ticketDetailsQueryOptions = (ticketId: string) =>
+	queryOptions({
+		queryKey: ["get-ticket-details", ticketId],
+		queryFn: () => getTicketDetails(ticketId),
+		staleTime: Infinity,
+		retry: false,
+	});
+
+async function createTicket(ticket: { title: string; description: string }) {
+	const res = await apiCall(() => client.api.tickets.$post({ json: ticket }));
+
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error(data.error);
+	}
+
+	return await res.json();
+}
+
+export const useCreateTicketMutation = () => {
+	const queryClient = useQueryClient();
+	const mutation = useMutation({
+		mutationFn: createTicket,
+		onError: (error: Error) => {
+			toast.error(error.message);
+		},
+		onSuccess: () => {
+			toast.success("Ticket created successfully");
+			queryClient.invalidateQueries({ queryKey: ["get-my-tickets"] });
+		},
+	});
+
+	return mutation;
+};
+
+async function respondToTicket(ticket: { ticketId: string; response: string }) {
+	const res = await apiCall(() =>
+		client.api.tickets[":id"].$patch({
+			param: {
+				id: ticket.ticketId,
+			},
+			json: { response: ticket.response },
+		})
+	);
+
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error("error" in data ? data.error : `Error ${res.status}`);
+	}
+
+	return await res.json();
+}
+
+export const useResolveTicketMutation = () => {
+	const queryClient = useQueryClient();
+	const mutation = useMutation({
+		mutationFn: respondToTicket,
+		onError: (error: Error) => {
+			toast.error(error.message);
+		},
+		onSuccess: () => {
+			toast.success("Ticket resolved successfully");
+			queryClient.invalidateQueries({ queryKey: ["get-tickets"] });
+		},
+	});
+
 	return mutation;
 };

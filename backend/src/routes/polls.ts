@@ -101,8 +101,7 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 				);
 		}
 
-		c.status(201);
-		return c.json(createdPoll);
+		return c.json(createdPoll, 201);
 	})
 	.get("/", async (c) => {
 		const payload = c.get("jwtPayload");
@@ -132,7 +131,7 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 			.from(pollsTable)
 			.where(eq(pollsTable.creatorAddress, address));
 
-		if (!polls) return c.json({ error: "No polls found" }, 404);
+		if (polls.length === 0) return c.json({ error: "No polls found" }, 404);
 
 		return c.json(polls);
 	})
@@ -151,7 +150,7 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 			.then((res) => res[0]);
 
 		if (!poll) {
-			return c.json({ error: "Poll not found or invalid code" }, 404);
+			return c.json({ error: "Invalid code" }, 404);
 		}
 
 		const existingParticipant = await db
@@ -245,7 +244,7 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 			.then((res) => res[0]);
 
 		if (!poll) {
-			return c.json({ error: "No poll found" }, 404);
+			return c.json({ error: "Poll not found" }, 404);
 		}
 
 		const pollOptions = await db
