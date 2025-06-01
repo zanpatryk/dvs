@@ -135,7 +135,7 @@ function RouteComponent() {
 									key={poll.id}
 									id={poll.id}
 									title={poll.title}
-									description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+									description={poll.description}
 									endDate={
 										poll.endTime
 											? new Date(poll.endTime)
