@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import {
+	DialogClose,
+	DialogDescription,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import {
 	Form,
 	FormControl,
@@ -10,24 +15,22 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreatePollMutation } from "@/lib/api";
+import { cn, formatDate } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogClose } from "@radix-ui/react-dialog";
 import { CalendarIcon, CirclePlus, Plus, X } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { Calendar } from "@/components/ui/calendar";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { z } from "zod";
-import { cn, formatDate } from "@/lib/utils";
 
-const createPollFormSchema = z.object({
+const FormSchema = z.object({
 	title: z.string().min(1, {
 		message: "Title cannot be empty",
 	}),
@@ -49,11 +52,11 @@ const createPollFormSchema = z.object({
 		.min(1, { message: "Participant limit must be at least 1" }),
 });
 
-export type CreatePollFormType = z.infer<typeof createPollFormSchema>;
+export type CreatePollFormType = z.infer<typeof FormSchema>;
 
 const CreatePoll = () => {
 	const form = useForm<CreatePollFormType>({
-		resolver: zodResolver(createPollFormSchema),
+		resolver: zodResolver(FormSchema),
 		defaultValues: {
 			title: "",
 			description: "",

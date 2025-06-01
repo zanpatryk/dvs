@@ -1,9 +1,9 @@
+import CreatePoll from "@/components/poll/create";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import CreatePoll from "@/components/poll/create";
 import { createdPollsQueryOptions } from "@/lib/api";
-import { columns } from "@/polls/columns";
-import { DataTable } from "@/polls/data-table";
+import { columns } from "@/manage-polls-table/columns";
+import { DataTable } from "@/manage-polls-table/data-table";
 import { DashboardHeaderAction } from "@/routes/_authenticated/_dashboard";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";

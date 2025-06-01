@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
-import { useEndPollMutation } from "@/lib/api";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 import { formatDate } from "@/lib/utils";
-import { DialogTrigger } from "@radix-ui/react-dialog";
+import { EndPollButton } from "@/manage-polls-table/end-poll-button";
 import { ColumnDef } from "@tanstack/react-table";
-import { FileSearch, Loader2 } from "lucide-react";
+import { FileSearch } from "lucide-react";
 
 export const columns: ColumnDef<{
 	id: string;
@@ -140,23 +144,3 @@ export const columns: ColumnDef<{
 		},
 	},
 ];
-
-const EndPollButton = ({
-	pollId,
-	children,
-}: React.PropsWithChildren & { pollId: string }) => {
-	const mutation = useEndPollMutation(pollId);
-
-	return (
-		<Button
-			className="bg-red-500 hover:bg-red-600"
-			onClick={() => mutation.mutate()}
-		>
-			{mutation.isPending ? (
-				<Loader2 className="animate-spin" />
-			) : (
-				children
-			)}
-		</Button>
-	);
-};

@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { DialogClose } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PollsData } from "@/dummy/data";
-import { DialogClose } from "@radix-ui/react-dialog";
-import { Label } from "@radix-ui/react-label";
 import { CheckCircle } from "lucide-react";
 
 const ViewPoll = ({ pollId }: { pollId: string }) => {

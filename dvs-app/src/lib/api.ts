@@ -97,17 +97,18 @@ async function getPoll(pollId: string) {
 		})
 	);
 
-	if (!res.ok) throw new Error("Not found");
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error("error" in data ? data.error : `Error ${res.status}`);
+	}
 
 	return await res.json();
 }
 
-export const pollQueryOptions = (pollId: string) =>
+export const pollDetailsQueryOptions = (pollId: string) =>
 	queryOptions({
-		queryKey: ["get-poll", pollId],
-		queryFn: async () => {
-			return getPoll(pollId);
-		},
+		queryKey: ["get-poll-details", pollId],
+		queryFn: () => getPoll(pollId),
 		staleTime: Infinity,
 		retry: false,
 	});
@@ -136,6 +137,37 @@ export const useCreatePollMutation = () => {
 				queryClient.invalidateQueries({
 					queryKey: ["get-created-polls"],
 				});
+			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+		},
+	});
+
+	return mutation;
+};
+
+async function joinPoll(code: string) {
+	const res = await apiCall(() =>
+		client.api.polls.join.$patch({
+			json: { code },
+		})
+	);
+
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error(data.error);
+	}
+
+	return await res.json();
+}
+
+export const useJoinPollMutation = () => {
+	const queryClient = useQueryClient();
+	const mutation = useMutation({
+		mutationFn: joinPoll,
+		onError: (error: Error) => {
+			toast.error(error.message);
+		},
+		onSuccess: () => {
+			toast.success("Joined poll successfully");
 			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
 		},
 	});
