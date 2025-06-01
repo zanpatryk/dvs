@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
 	DialogClose,
 	DialogDescription,
+	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -49,15 +50,14 @@ const JoinPoll = () => {
 				onSubmit={form.handleSubmit(onSubmit)}
 				className="w-2/3 space-y-6"
 			>
-				<div className="flex flex-col gap-2">
+				<DialogHeader>
 					<DialogTitle className="text-2xl font-bold">
 						Join Poll
 					</DialogTitle>
 					<DialogDescription>
-						Please enter the one-time code provided by the poll
-						creator.
+						Please enter the code provided by the poll creator.
 					</DialogDescription>
-				</div>
+				</DialogHeader>
 				<FormField
 					control={form.control}
 					name="code"
