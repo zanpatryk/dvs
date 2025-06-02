@@ -14,7 +14,7 @@ interface ApiResponse {
 	json(): Promise<any>;
 }
 
-async function apiCall<T extends ApiResponse>(
+export async function apiCall<T extends ApiResponse>(
 	fn: () => Promise<T>
 ): Promise<T> {
 	const res = await fn();
