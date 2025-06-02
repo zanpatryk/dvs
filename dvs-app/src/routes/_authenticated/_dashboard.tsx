@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { StatsData } from "@/dummy/data";
 import { useAuth } from "@/hooks/use-auth";
+import { useContract } from "@/hooks/use-contract";
 import { Unauthorized } from "@/routes/_authenticated";
 import {
 	createFileRoute,
@@ -17,6 +18,8 @@ import {
 	useMatches,
 	useRouteContext,
 } from "@tanstack/react-router";
+import { Contract } from "ethers";
+import React from "react";
 import { ReactNode } from "react";
 
 export enum UserRole {
@@ -36,10 +39,28 @@ const WALLET_ROLE_MAP: Record<string, UserRole> = {
 	"0x30523b4fa092ec6517b725d9a37e0ad3b7b2ea73": UserRole.Manager, // Yourekt | Account 1
 };
 
-function getRoleForWallet(address?: string): UserRole {
-	// TODO: Replace this with actual role-fetching logic (e.g., contract call or API)
-	if (!address) return UserRole.User; // Default/fallback
-	return WALLET_ROLE_MAP[address] ?? UserRole.User;
+async function getRoleForWallet(address?: string, contract?: Contract): Promise<UserRole> {
+
+	console.log(address)
+
+	if( !contract){
+		console.log("getRoleForWallet error")
+		return UserRole.User
+	}
+	
+	const MANAGER_ROLE = await contract.MANAGER_ROLE();
+	const USER_ROLE = await contract.USER_ROLE();
+	const ADMIN_ROLE = await contract.ADMIN_ROLE();
+
+    const isManager = await contract.hasRole(MANAGER_ROLE, address);
+    const isAdmin   = await contract.hasRole(ADMIN_ROLE, address);
+
+	console.log("retrieved role " + isManager + " " + isAdmin )
+
+	return isAdmin ? UserRole.Admin : isManager ? UserRole.Manager : UserRole.User
+
+	// if (!address) return UserRole.User; // Default/fallback
+	// return WALLET_ROLE_MAP[address] ?? UserRole.User;
 }
 
 export const Route = createFileRoute("/_authenticated/_dashboard")({
@@ -61,11 +82,23 @@ function RouteComponent() {
 		from: currentMatch.routeId,
 	});
 
+	const {contract} = useContract();
+
 	const headerAction =
 		"headerAction" in context ? context.headerAction : undefined;
 
 	const address = useAuth().data?.address ?? undefined;
-	const userRole = getRoleForWallet(address);
+	    const [userRole, setUserRole] = React.useState<UserRole>(UserRole.User);
+
+    React.useEffect(() => {
+        let isMounted = true;
+        getRoleForWallet(address, contract ?? undefined).then((role) => {
+            if (isMounted) setUserRole(role);
+        });
+        return () => {
+            isMounted = false;
+        };
+    }, [address, contract]);
 
 	return (
 		<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">

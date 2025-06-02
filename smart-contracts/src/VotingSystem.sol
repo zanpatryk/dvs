@@ -18,8 +18,7 @@ contract VotingSystem is AccessControlEnumerable {
     uint256 private s_pollCount;
     mapping(uint256 => address) private s_polls;
     mapping(bytes32 => uint256) private s_accessCodes;
-    mapping(address => bool) private s_isManager;
-    mapping(address => bool) private s_isAdmin;
+    mapping(address => uint256[]) private s_pollsByManager;
 
     // Each code maps to a pollId; and we track how many uses remain
     mapping(bytes32 => uint256) private s_accessCodeUses;
@@ -41,7 +40,6 @@ contract VotingSystem is AccessControlEnumerable {
 
         // Grant roles to deployer and initial admins
         _grantRole(ADMIN_ROLE, msg.sender);
-        s_isAdmin[msg.sender] = true;
     }
 
     /**
@@ -70,7 +68,20 @@ contract VotingSystem is AccessControlEnumerable {
         s_accessCodes[code] = pollId;
         s_accessCodeUses[code] = _maxUses;
 
+        s_pollsByManager[msg.sender].push(pollId);
+
         emit AccessCodeGenerated(pollId, code, _maxUses);
+    }
+
+    /**
+     * @notice Activate a given poll (CREATED → ACTIVE). Only a manager may call.
+     */
+    function startPoll(uint256 _pollId) external onlyRole(MANAGER_ROLE) {
+        address pollAddress = s_polls[_pollId];
+        require(pollAddress != address(0), "VotingSystem: invalid pollId");
+
+        // Now we forward to Poll.start(), and `msg.sender` inside Poll will be VotingSystem
+        Poll(pollAddress).start();
     }
 
     /**
@@ -106,24 +117,18 @@ contract VotingSystem is AccessControlEnumerable {
      */
     function castVote(uint256 _pollId, uint256 _option) external onlyRole(USER_ROLE) {
         address pollAddress = s_polls[_pollId];
-        Poll(pollAddress).castVote(_option);
+        require(pollAddress != address(0), "VotingSystem: invalid pollId");
+
+        Poll(pollAddress).castVote(msg.sender, _option);
     }
 
     /// @notice Close a poll early (MANAGER_ROLE) or automatically once its deadline passes (anyone)
-    function endPoll(uint256 _pollId) external {
+    function endPoll(uint256 _pollId) external onlyRole(MANAGER_ROLE) {
         address pollAddress = s_polls[_pollId];
         require(pollAddress != address(0), "VotingSystem: invalid pollId");
 
-        Poll poll = Poll(pollAddress);
-
-        // If caller isn't a manager, only allow after the poll's end time
-        if (!hasRole(MANAGER_ROLE, msg.sender)) {
-            uint256 deadline = poll.getEndTime();
-            require(block.timestamp >= deadline, "VotingSystem: too early to close");
-        }
-
         // This will revert unless poll is in ACTIVE state
-        poll.end();
+        Poll(pollAddress).end();
     }
 
     /**
@@ -132,19 +137,19 @@ contract VotingSystem is AccessControlEnumerable {
      * @param _role    Bytes32 role identifier
      */
     function changeUserRole(address _account, bytes32 _role) external onlyRole(ADMIN_ROLE) {
-        require(_role == ADMIN_ROLE || _role == MANAGER_ROLE || _role == USER_ROLE, "VotingSystem: invalid role");
-        // Revoke old roles
-        if (hasRole(ADMIN_ROLE, _account)) revokeRole(ADMIN_ROLE, _account);
+        // Revoke any existing role
+        if (hasRole(ADMIN_ROLE, _account)) {
+            revokeRole(ADMIN_ROLE, _account);
+        }
         if (hasRole(MANAGER_ROLE, _account)) {
             revokeRole(MANAGER_ROLE, _account);
-            s_isManager[_account] = false;
         }
-        if (hasRole(USER_ROLE, _account)) revokeRole(USER_ROLE, _account);
-        // Grant new
+        if (hasRole(USER_ROLE, _account)) {
+            revokeRole(USER_ROLE, _account);
+        }
+
+        // Grant exactly the new role
         grantRole(_role, _account);
-        if (_role == MANAGER_ROLE) {
-            s_isManager[_account] = true;
-        }
     }
 
     /// @notice After a poll is ended, mint a results-NFT to the caller
@@ -218,10 +223,14 @@ contract VotingSystem is AccessControlEnumerable {
     }
 
     function isManager(address account) external view returns (bool) {
-        return s_isManager[account];
+        return hasRole(MANAGER_ROLE, account);
     }
 
     function isAdmin(address account) external view returns (bool) {
-        return s_isAdmin[account];
+        return hasRole(ADMIN_ROLE, account);
+    }
+
+    function getPollsByManager(address manager) external view returns (uint256[] memory) {
+        return s_pollsByManager[manager];
     }
 }

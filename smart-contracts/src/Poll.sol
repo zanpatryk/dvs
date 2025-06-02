@@ -34,6 +34,7 @@ contract Poll {
 
     uint256 private s_startTime;
     uint256 private s_endTime;
+    uint256 private s_duration;
 
     address private immutable i_manager;
 
@@ -69,7 +70,7 @@ contract Poll {
             revert Poll__OptionCountMustBeGreaterThanTwo();
         }
 
-        if (_duration < -0) {
+        if (_duration == 0) {
             revert Poll__MustLastLongerThanZero();
         }
 
@@ -77,7 +78,8 @@ contract Poll {
         s_options = _options;
         i_manager = msg.sender;
         s_state = State.CREATED;
-        s_endTime = type(uint256).max;
+        s_duration = _duration;
+        s_endTime = 0;
         s_startTime = 0;
     }
 
@@ -87,7 +89,7 @@ contract Poll {
      */
     function start() external onlyManager inState(State.CREATED) {
         s_startTime = block.timestamp;
-        s_endTime = block.timestamp + (s_endTime == type(uint256).max ? 0 : 0);
+        s_endTime = block.timestamp + s_duration;
 
         s_state = State.ACTIVE;
         emit PollStarted(s_startTime, s_endTime);
@@ -109,22 +111,21 @@ contract Poll {
      * @notice Cast your vote once poll is Active.
      * @param _option Index of the chosen option
      */
-    function castVote(uint256 _option) external inState(State.ACTIVE) {
+    function castVote(address _voter, uint256 _option) external inState(State.ACTIVE) {
         require(block.timestamp <= s_endTime, "Poll: voting period over");
         require(s_isRegistered[msg.sender], "Poll: not registered");
         require(!s_hasVoted[msg.sender], "Poll: already voted");
         require(_option < s_options.length, "Poll: invalid option");
 
-        s_hasVoted[msg.sender] = true;
+        s_hasVoted[_voter] = true;
         s_votes[_option] += 1;
-        emit VoteCast(msg.sender, _option);
+        emit VoteCast(_voter, _option);
     }
 
     /**
      * @notice End the poll. Can be called by manager or automatically by timestamp.
      */
     function end() external inState(State.ACTIVE) {
-        require(msg.sender == i_manager || block.timestamp > s_endTime, "Poll: only manager or after timeout");
         s_state = State.ENDED;
         emit PollEnded(block.timestamp);
     }
@@ -162,5 +163,12 @@ contract Poll {
      */
     function getEndTime() external view returns (uint256) {
         return s_endTime;
+    }
+
+    /**
+     * @notice Retrieve the participants
+     */
+    function getRegisteredParticipants() external view returns (address[] memory) {
+        return s_participantList;
     }
 }
