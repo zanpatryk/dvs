@@ -43,19 +43,19 @@ async function getRoleForWallet(address?: string, contract?: Contract): Promise<
 
 	console.log(address)
 
-	if( !contract){
+	if (!contract) {
 		console.log("getRoleForWallet error")
 		return UserRole.User
 	}
-	
+
 	const MANAGER_ROLE = await contract.MANAGER_ROLE();
 	const USER_ROLE = await contract.USER_ROLE();
 	const ADMIN_ROLE = await contract.ADMIN_ROLE();
 
-    const isManager = await contract.hasRole(MANAGER_ROLE, address);
-    const isAdmin   = await contract.hasRole(ADMIN_ROLE, address);
+	const isManager = await contract.hasRole(MANAGER_ROLE, address);
+	const isAdmin = await contract.hasRole(ADMIN_ROLE, address);
 
-	console.log("retrieved role " + isManager + " " + isAdmin )
+	console.log("retrieved role " + isManager + " " + isAdmin)
 
 	return isAdmin ? UserRole.Admin : isManager ? UserRole.Manager : UserRole.User
 
@@ -82,23 +82,23 @@ function RouteComponent() {
 		from: currentMatch.routeId,
 	});
 
-	const {contract} = useContract();
+	const { contract } = useContract();
 
 	const headerAction =
 		"headerAction" in context ? context.headerAction : undefined;
 
 	const address = useAuth().data?.address ?? undefined;
-	    const [userRole, setUserRole] = React.useState<UserRole>(UserRole.User);
+	const [userRole, setUserRole] = React.useState<UserRole>(UserRole.User);
 
-    React.useEffect(() => {
-        let isMounted = true;
-        getRoleForWallet(address, contract ?? undefined).then((role) => {
-            if (isMounted) setUserRole(role);
-        });
-        return () => {
-            isMounted = false;
-        };
-    }, [address, contract]);
+	React.useEffect(() => {
+		let isMounted = true;
+		getRoleForWallet(address, contract ?? undefined).then((role) => {
+			if (isMounted) setUserRole(role);
+		});
+		return () => {
+			isMounted = false;
+		};
+	}, [address, contract]);
 
 	return (
 		<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
