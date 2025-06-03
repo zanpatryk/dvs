@@ -6,18 +6,15 @@ import { eq } from "drizzle-orm";
 const testAddress = "0x1234567890abcdef1234567890abcdef12345678";
 
 beforeAll(async () => {
-  // Clean up any test session that might exist
   await db.delete(sessionsTable).where(eq(sessionsTable.address, testAddress));
 });
 
 afterAll(async () => {
-  // Clean up after tests
   await db.delete(sessionsTable).where(eq(sessionsTable.address, testAddress));
 });
 
 describe("sessionsTable insert and select", () => {
   it("should insert and retrieve a session", async () => {
-    // Insert a session with the test address
     const inserted = await db
       .insert(sessionsTable)
       .values({
@@ -29,7 +26,6 @@ describe("sessionsTable insert and select", () => {
     expect(inserted?.[0]?.address ?? "").toBe(testAddress);
     expect(inserted?.[0]?.id).toBeDefined();
 
-    // Query by id (using the inserted session id)
 if (inserted.length === 0 || !inserted[0]?.id) {
   throw new Error("No inserted records or missing id");
 }
