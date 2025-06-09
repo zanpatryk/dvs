@@ -11,8 +11,8 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { UserRole } from "@/hooks/use-contract-query";
 import { useMetaMask } from "@/hooks/use-meta-mask";
-import { UserRole } from "@/routes/_authenticated/_dashboard";
 import { Link } from "@tanstack/react-router";
 import {
 	Clipboard,
@@ -37,7 +37,7 @@ const items = [
 	},
 	{
 		title: "Manage Users",
-		url: "/users",
+		url: "/manage-users",
 		icon: User,
 		tag: "admin",
 	},

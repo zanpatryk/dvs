@@ -16,8 +16,10 @@ import { Link } from "@tanstack/react-router";
 import { LayoutGrid, LogOut, User } from "lucide-react";
 
 const Navbar = () => {
-	const { login, isLoginPending, logout } = useMetaMask();
+	const { login, isLoggingIn, logout } = useMetaMask();
 	const { data, isPending, isError } = useAuth();
+
+	const address = data?.address;
 
 	const handleLogin = async () => {
 		login();
@@ -29,7 +31,7 @@ const Navbar = () => {
 
 	const renderAuthSection = () => {
 		// Loading state
-		if (isPending || isLoginPending) {
+		if (isPending || isLoggingIn) {
 			return (
 				<div className="flex items-center gap-2">
 					<Skeleton className="h-10 w-32" />
@@ -55,7 +57,7 @@ const Navbar = () => {
 		}
 
 		// Authenticated state
-		if (data?.address) {
+		if (address) {
 			return (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
