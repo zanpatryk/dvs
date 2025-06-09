@@ -1,5 +1,5 @@
 import { CreatePollFormType } from "@/components/poll/create";
-import { client } from "@/hono-client";
+import { client } from "@/lib/hono-client";
 import {
 	queryOptions,
 	useMutation,
@@ -163,8 +163,6 @@ export const useVotePollMutation = () => {
 
 	return mutation;
 };
-
-
 
 async function joinPoll(code: string) {
 	const res = await apiCall(() =>
