@@ -1,4 +1,5 @@
 import { Form, FormField } from '@/components/ui/form';
+import { useContract } from '@/hooks/use-contract';
 import { UserRole } from '@/routes/_authenticated/_dashboard';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createFileRoute } from '@tanstack/react-router'
@@ -29,6 +30,8 @@ function RouteComponent() {
     const [role, setRole] = useState<UserRole>(UserRole.User);
     const [submitting, setSubmitting] = useState(false);
 
+    const {contract} = useContract();
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -37,7 +40,37 @@ function RouteComponent() {
         },
     });
 
-    const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+
+        if( !contract){
+                console.log("handleSubmit error")
+                return
+            }
+
+        if( role === UserRole.Admin){
+            const tx = await contract.changeUserRole(
+                address,
+                await contract.ADMIN_ROLE(),
+            );
+
+            await tx.wait();
+        }else if( role === UserRole.Manager){
+            const tx = await contract.changeUserRole(
+                address,
+                await contract.MANAGER_ROLE(),
+            );
+
+            await tx.wait();
+        }else{
+            const tx = await contract.changeUserRole(
+                address,
+                await contract.USER_ROLE(),
+            );
+
+            await tx.wait();
+        }
+
+
         console.log("Updating role:", data);
     };
 
