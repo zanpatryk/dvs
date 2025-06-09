@@ -1,16 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { CirclePlus, Inbox } from "lucide-react";
 import JoinPoll from "@/components/poll/join";
-import { useQuery } from "@tanstack/react-query";
+import { PollCard } from "@/components/poll/poll-card";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { pollsQueryOptions } from "@/lib/api";
-import { DashboardHeaderAction } from "@/routes/_authenticated/_dashboard";
-import { PollCard } from "@/components/poll/poll-card";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { DashboardHeaderAction } from "@/routes/_authenticated/_dashboard/route";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { CirclePlus, Inbox } from "lucide-react";
 
 export const Route = createFileRoute(
-	"/_authenticated/_dashboard/dashboard/polls"
+	"/_authenticated/_dashboard/dashboard/_not-for-admin/polls"
 )({
 	beforeLoad: () => {
 		const headerAction: DashboardHeaderAction = {
@@ -80,13 +80,19 @@ function RouteComponent() {
 	const activePolls =
 		data?.filter((poll) => {
 			const endTime = poll.endTime ? new Date(poll.endTime) : null;
-			return (!endTime || endTime.getTime() > Date.now()) && !poll.hasEndedPrematurely;
+			return (
+				(!endTime || endTime.getTime() > Date.now()) &&
+				!poll.hasEndedPrematurely
+			);
 		}) || [];
 
 	const completedPolls =
 		data?.filter((poll) => {
 			const endTime = poll.endTime ? new Date(poll.endTime) : null;
-			return (endTime && endTime.getTime() <= Date.now()) || poll.hasEndedPrematurely;
+			return (
+				(endTime && endTime.getTime() <= Date.now()) ||
+				poll.hasEndedPrematurely
+			);
 		}) || [];
 
 	return (

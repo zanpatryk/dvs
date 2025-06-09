@@ -1,7 +1,7 @@
-import { client } from "@/hono-client";
+import { getEthereumProvider } from "@/lib/ethereum";
+import { client } from "@/lib/hono-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { ethers } from "ethers";
 
 export function useMetaMask() {
 	const queryClient = useQueryClient();
@@ -9,13 +9,22 @@ export function useMetaMask() {
 
 	const loginMutation = useMutation({
 		mutationFn: async () => {
-			if (!window.ethereum) {
-				throw new Error("MetaMask not installed");
+			if (typeof window === "undefined" || !window.ethereum) {
+				throw new Error("Ethereum provider not available");
 			}
-			const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+
+			const accounts = await window.ethereum.request({
+				method: "eth_requestAccounts",
+			});
+
 			const address = accounts[0]; // Use the currently selected account
 
-			const provider = new ethers.BrowserProvider(window.ethereum);
+			const provider = await getEthereumProvider();
+
+			if (!provider) {
+				throw new Error("Ethereum provider not initialized");
+			}
+
 			const signer = await provider.getSigner(address);
 
 			const nonceRes = await client.auth.nonce[":address"].$get({
@@ -23,9 +32,11 @@ export function useMetaMask() {
 					address,
 				},
 			});
+
 			if (!nonceRes.ok) {
 				throw new Error("Failed to fetch nonce");
 			}
+
 			const { nonce } = await nonceRes.json();
 
 			const signature = await signer.signMessage(nonce);
@@ -36,12 +47,16 @@ export function useMetaMask() {
 					signature,
 				},
 			});
+
 			if (!loginRes.ok) {
 				const data = await loginRes.json();
 				throw new Error(data.error);
 			}
-
-			await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+		},
+		onSuccess() {
+			queryClient.invalidateQueries({
+				queryKey: ["auth", "me"],
+			});
 		},
 		onError(error) {
 			console.error(error.message);
@@ -52,7 +67,9 @@ export function useMetaMask() {
 		mutationFn: async () => {
 			const res = await client.auth.logout.$post();
 			if (!res.ok) throw new Error("Failed to logout");
-			await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+		},
+		onSettled() {
+			queryClient.clear();
 			navigate({ to: "/" });
 		},
 		onError(error) {
@@ -60,20 +77,12 @@ export function useMetaMask() {
 		},
 	});
 
-	const refreshMutation = useMutation({
-		mutationFn: async () => {
-			const res = await client.auth.refresh.$post();
-			if (!res.ok) throw new Error("Failed to refresh token");
-			await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
-		},
-		onError(error) {
-			console.error(error.message);
-		},
-	});
 	return {
 		login: loginMutation.mutate,
-		isLoginPending: loginMutation.isPending,
 		logout: logoutMutation.mutate,
-		refresh: refreshMutation.mutate,
+		isLoggingIn: loginMutation.isPending,
+		isLoggingOut: logoutMutation.isPending,
+		loginError: loginMutation.error,
+		logoutError: logoutMutation.error,
 	};
 }
