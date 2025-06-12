@@ -1,15 +1,26 @@
-import { columns } from "@/components/manage-tickets-table/columns";
-import { DataTable } from "@/components/manage-tickets-table/data-table";
+import { columns } from "@/components/manage-polls-table/columns";
+import { DataTable } from "@/components/manage-polls-table/data-table";
+import CreatePoll from "@/components/poll/create";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ticketsQueryOptions } from "@/lib/api";
+import { createdPollsQueryOptions } from "@/lib/api";
+import { DashboardHeaderAction } from "@/routes/_authenticated/_dashboard/route";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { FolderOpen } from "lucide-react";
+import { CirclePlus, Inbox } from "lucide-react";
 
 export const Route = createFileRoute(
-	"/_authenticated/_dashboard/dashboard/manage-tickets"
+	"/_authenticated/_dashboard/dashboard/_manager-only/manage-polls"
 )({
+	beforeLoad: () => {
+		const headerAction: DashboardHeaderAction = {
+			label: "Create Poll",
+			icon: <CirclePlus className="mr-2 h-4 w-4" />,
+			dialog: <CreatePoll />,
+		};
+
+		return { headerAction };
+	},
 	component: RouteComponent,
 });
 
@@ -17,14 +28,14 @@ function EmptyState() {
 	return (
 		<div className="flex flex-col items-center justify-center py-12 text-center">
 			<div className="rounded-full bg-gray-200 p-6 mb-4">
-				<FolderOpen className="h-8 w-8 text-gray-400" />
+				<Inbox className="h-8 w-8 text-gray-400" />
 			</div>
 			<h3 className="text-lg font-semibold text-gray-900 mb-2">
-				No Tickets Found
+				No Polls Created
 			</h3>
 			<p className="text-sm text-gray-500 max-w-sm">
-				You don't have any tickets yet. Tickets will appear here when
-				they're created.
+				You haven't created any polls yet. Create your first poll to get
+				started!
 			</p>
 		</div>
 	);
@@ -44,7 +55,6 @@ function LoadingSkeleton() {
 						<Skeleton className="h-4 w-32" />
 						<Skeleton className="h-4 w-20" />
 						<Skeleton className="h-4 w-28" />
-						<Skeleton className="h-4 w-24" />
 					</div>
 				</div>
 				{[1, 2, 3, 4, 5].map((i) => (
@@ -54,7 +64,6 @@ function LoadingSkeleton() {
 							<Skeleton className="h-4 w-32" />
 							<Skeleton className="h-4 w-20" />
 							<Skeleton className="h-4 w-28" />
-							<Skeleton className="h-4 w-24" />
 						</div>
 					</div>
 				))}
@@ -64,47 +73,48 @@ function LoadingSkeleton() {
 }
 
 function RouteComponent() {
-	const { isPending, error, data } = useQuery(ticketsQueryOptions);
+	const { isPending, error, data } = useQuery(createdPollsQueryOptions);
+	const createdPolls = (data || []).map((poll) => ({
+		...poll,
+		startTime: new Date(poll.startTime),
+		endTime: new Date(poll.endTime),
+	}));
 
 	return (
 		<div className="h-full flex flex-col">
 			{/* Header Section */}
 			<div className="mb-6 flex-shrink-0">
 				<h1 className="text-3xl font-bold text-gray-900 mb-2">
-					Manage Support Tickets
+					Manage Polls
 				</h1>
 				<p className="text-gray-600">
-					Here you can view and manage support tickets.
+					View and manage all the polls you've created
 				</p>
 			</div>
 
 			{/* Content */}
 			<div className="flex-initial min-h-0">
 				<Card className="h-full">
-					<CardContent className="p-6 h-full flex flex-col">
+					<CardContent className="h-full flex flex-col">
 						{isPending ? (
 							<LoadingSkeleton />
 						) : error !== null &&
-						  !error.message.includes("No tickets found") ? (
+						  !error.message.includes("No polls found") ? (
 							<div className="flex flex-col items-center justify-center py-12 text-center">
 								<div className="text-red-600 mb-4">
-									Error loading tickets
+									Error loading polls
 								</div>
 								<p className="text-sm text-gray-600">
-									Failed to load support tickets. Please try
-									again.
+									Failed to load polls. Please try again.
 								</p>
 							</div>
-						) : !data || data.length === 0 ? (
+						) : createdPolls.length === 0 ? (
 							<EmptyState />
 						) : (
 							<div className="flex-1 overflow-hidden px-2">
 								<DataTable
 									columns={columns}
-									data={data.map((ticket) => ({
-										...ticket,
-										createdAt: new Date(ticket.createdAt),
-									}))}
+									data={createdPolls}
 								/>
 							</div>
 						)}

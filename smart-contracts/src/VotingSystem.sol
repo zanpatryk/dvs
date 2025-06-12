@@ -28,7 +28,6 @@ contract VotingSystem is AccessControlEnumerable {
 
     // Events
     event PollCreated(uint256 indexed pollId, address pollAddress, string title);
-    event AccessCodesGenerated(uint256 indexed pollId, uint256 count);
     event JoinedPoll(address indexed user, uint256 indexed pollId);
     event ResultsRetrieved(address indexed user, uint256 indexed pollId, uint256 tokenId);
     event AccessCodeGenerated(uint256 indexed pollId, bytes32 indexed code, uint256 maxUses);
@@ -57,7 +56,7 @@ contract VotingSystem is AccessControlEnumerable {
 
         // Deploy new Poll with this contract as its manager
         Poll poll = new Poll(_title, _options, _duration);
-        uint256 pollId = ++s_pollCount;
+        uint256 pollId = ++s_pollCount + block.timestamp;
         s_polls[pollId] = address(poll);
         emit PollCreated(pollId, address(poll), _title);
 
@@ -70,25 +69,16 @@ contract VotingSystem is AccessControlEnumerable {
 
         s_pollsByManager[msg.sender].push(pollId);
 
+        Poll(address(poll)).start();
+
         emit AccessCodeGenerated(pollId, code, _maxUses);
-    }
-
-    /**
-     * @notice Activate a given poll (CREATED → ACTIVE). Only a manager may call.
-     */
-    function startPoll(uint256 _pollId) external onlyRole(MANAGER_ROLE) {
-        address pollAddress = s_polls[_pollId];
-        require(pollAddress != address(0), "VotingSystem: invalid pollId");
-
-        // Now we forward to Poll.start(), and `msg.sender` inside Poll will be VotingSystem
-        Poll(pollAddress).start();
     }
 
     /**
      * @notice Join a poll by providing a valid access code.
      * @param _code The unique code provided by a manager
      */
-    function joinPoll(bytes32 _code) external onlyRole(USER_ROLE) {
+    function joinPoll(bytes32 _code) external {
         uint256 pollId = s_accessCodes[_code];
         require(pollId != 0, "VotingSystem: invalid code");
 
@@ -115,7 +105,7 @@ contract VotingSystem is AccessControlEnumerable {
      * @param _pollId The target poll ID
      * @param _option Option index to vote for
      */
-    function castVote(uint256 _pollId, uint256 _option) external onlyRole(USER_ROLE) {
+    function castVote(uint256 _pollId, uint256 _option) external {
         address pollAddress = s_polls[_pollId];
         require(pollAddress != address(0), "VotingSystem: invalid pollId");
 
@@ -232,5 +222,12 @@ contract VotingSystem is AccessControlEnumerable {
 
     function getPollsByManager(address manager) external view returns (uint256[] memory) {
         return s_pollsByManager[manager];
+    }
+
+    function hasUserVoted(uint256 _pollId, address _user) external view returns (bool) {
+        address pollAddress = s_polls[_pollId];
+        require(pollAddress != address(0), "VotingSystem: invalid pollId");
+
+        return Poll(pollAddress).hasVoted(_user);
     }
 }

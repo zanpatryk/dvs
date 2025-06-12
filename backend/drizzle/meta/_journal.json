@@ -36,6 +36,27 @@
       "when": 1748797637110,
       "tag": "0004_clear_odin",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1749682646232,
+      "tag": "0005_high_cable",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1749684820999,
+      "tag": "0006_milky_invaders",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1749684996820,
+      "tag": "0007_nice_killer_shrike",
+      "breakpoints": true
     }
   ]
 }

@@ -1,14 +1,14 @@
-import { columns } from "@/components/tickets-table/columns";
-import { DataTable } from "@/components/tickets-table/data-table";
+import { columns } from "@/components/manage-tickets-table/columns";
+import { DataTable } from "@/components/manage-tickets-table/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { myTicketsQueryOptions } from "@/lib/api";
+import { ticketsQueryOptions } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { FolderOpen } from "lucide-react";
 
 export const Route = createFileRoute(
-	"/_authenticated/_dashboard/dashboard/tickets"
+	"/_authenticated/_dashboard/dashboard/_admin-only/manage-tickets"
 )({
 	component: RouteComponent,
 });
@@ -64,16 +64,18 @@ function LoadingSkeleton() {
 }
 
 function RouteComponent() {
-	const { isPending, error, data } = useQuery(myTicketsQueryOptions);
+	const { isPending, error, data } = useQuery(ticketsQueryOptions);
 
 	return (
 		<div className="h-full flex flex-col">
 			{/* Header Section */}
 			<div className="mb-6 flex-shrink-0">
 				<h1 className="text-3xl font-bold text-gray-900 mb-2">
-					Support Tickets
+					Manage Support Tickets
 				</h1>
-				<p className="text-gray-600">View your support tickets</p>
+				<p className="text-gray-600">
+					Here you can view and manage support tickets.
+				</p>
 			</div>
 
 			{/* Content */}

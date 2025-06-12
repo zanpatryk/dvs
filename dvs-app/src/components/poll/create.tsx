@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import { useCreatePollContractMutation } from "@/hooks/use-contract-query";
 import { useCreatePollMutation } from "@/lib/api";
 import { cn, formatDate } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,7 +43,7 @@ const FormSchema = z.object({
 				value: z.string().min(1, { message: "Option cannot be empty" }),
 			})
 		)
-		.min(1, { message: "At least one option is required" })
+		.min(2, { message: "At least two option are required" })
 		.max(10, { message: "You can add up to 10 options" }),
 	endTime: z
 		.string()
@@ -61,7 +62,7 @@ const CreatePoll = () => {
 		defaultValues: {
 			title: "",
 			description: "",
-			options: [{ value: "Option #1" }],
+			options: [{ value: "Option #1" }, { value: "Option #2" }],
 			endTime: "",
 			managerIncluded: false,
 			participantLimit: 100,
@@ -73,10 +74,46 @@ const CreatePoll = () => {
 		name: "options",
 	});
 
-	const mutation = useCreatePollMutation();
+	const dbMutation = useCreatePollMutation();
+	const createMutation = useCreatePollContractMutation();
+	// const startMutation = useStartPollContractMutation();
 
 	async function onSubmit(data: CreatePollFormType) {
-		mutation.mutate({
+		const startTime = new Date();
+
+		const { pollId, accessCode, pollAddress } =
+			await createMutation.mutateAsync({
+				title: data.title,
+				options: data.options.map((option) => option.value),
+				duration: BigInt(
+					new Date(data.endTime).getTime() - startTime.getTime()
+				),
+				maxUses: BigInt(data.participantLimit),
+			});
+
+		if (createMutation.isError) {
+			console.error(
+				"Failed to create poll contract:",
+				createMutation.error
+			);
+			return;
+		}
+
+		// await startMutation.mutateAsync(pollId);
+
+		// if (startMutation.isError) {
+		// 	console.error(
+		// 		"Failed to start poll contract:",
+		// 		startMutation.error
+		// 	);
+		// 	return;
+		// }
+
+		dbMutation.mutate({
+			id: pollId.toString(),
+			address: pollAddress,
+			accessCode,
+			startTime: startTime.toISOString(),
 			...data,
 		});
 	}
@@ -330,7 +367,7 @@ const CreatePoll = () => {
 						</FormLabel>
 						<FormDescription className="mb-4">
 							Add the options that participants can vote for
-							(minimum 1, maximum 10)
+							(minimum 2, maximum 10)
 						</FormDescription>
 						<ScrollArea className="max-h-[300px] w-full">
 							<div className="space-y-3 pr-4">
