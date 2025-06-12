@@ -219,10 +219,10 @@ async function endPoll(pollId: string) {
 	return await res.json();
 }
 
-export const useEndPollMutation = (pollId: string) => {
+export const useEndPollMutation = () => {
 	const queryClient = useQueryClient();
 	const mutation = useMutation({
-		mutationFn: () => endPoll(pollId),
+		mutationFn: (pollId: string) => endPoll(pollId),
 		onError: (error: Error) => {
 			toast.error(error.message);
 		},

@@ -53,13 +53,20 @@ async function getUserRole(address?: string, contract?: VotingSystemContract) {
 		throw new Error("Contract not initialized or address not provided");
 	}
 
-	const [isManager, isAdmin] = await Promise.all([
+	const [isManager, isAdmin, isUser] = await Promise.all([
 		contract.isManager(address),
 		contract.isAdmin(address),
+		contract.isUser(address),
 	]);
 
 	if (isAdmin) return UserRole.Admin;
 	if (isManager) return UserRole.Manager;
+	if (isUser) return UserRole.User;
+
+	const tx = await contract.grantUserRole(address);
+
+	await tx.wait();
+
 	return UserRole.User;
 }
 
@@ -160,11 +167,13 @@ export function useCreatePollContractMutation() {
 			options,
 			duration,
 			maxUses,
+			managerIncluded,
 		}: {
 			title: string;
 			options: string[];
 			duration: bigint;
 			maxUses: bigint;
+			managerIncluded: boolean;
 		}) => {
 			const contract = queryClient.getQueryData<VotingSystemContract>([
 				"contract",
@@ -175,12 +184,11 @@ export function useCreatePollContractMutation() {
 				title,
 				options,
 				duration,
-				maxUses
+				maxUses,
+				managerIncluded
 			);
 
-			// return await tx.wait();
 			const receipt = await tx.wait();
-			console.log(receipt);
 
 			const PollCreatedEventArgs = (
 				receipt?.logs.find(
@@ -337,3 +345,176 @@ export function useMultipleUserVoteStatus(
 		),
 	});
 }
+
+export const useEndPollContractMutation = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (pollId: bigint) => {
+			const contract = queryClient.getQueryData<VotingSystemContract>([
+				"contract",
+			]);
+			if (!contract) throw new Error("Contract not initialized");
+
+			const tx = await contract.endPoll(pollId);
+			return await tx.wait();
+		},
+		onSuccess: (_, variables) => {
+			toast.success(`Poll ${variables.toString()} ended successfully`);
+			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+		},
+		onError: (error: Error) => {
+			console.error("Failed to end poll:", error);
+			toast.error(`Failed to end poll: ${error.message}`);
+		},
+	});
+};
+
+// Add this interface near the top with other types
+export interface PollResults {
+	pollId: string;
+	name: string;
+	description: string;
+	totalVotes: number;
+	options: Array<{
+		optionIndex: number;
+		votes: number;
+		percentage: number;
+	}>;
+}
+
+// Add this interface for the NFT data structure
+interface NFTData {
+	name: string;
+	description: string;
+}
+
+// Parse the NFT URI data
+function parsePollResults(uri: string, pollId: string): PollResults {
+	try {
+		// Extract JSON from data URI
+		const jsonString = uri.slice(uri.indexOf("{"));
+		const data = JSON.parse(jsonString) as NFTData;
+
+		// Extract CSV data from description
+		const csvData = data.description.replace("Results CSV: ", "");
+		const votes = csvData.split(",").map(Number);
+
+		// Calculate total votes and percentages
+		const totalVotes = votes.reduce((sum, count) => sum + count, 0);
+
+		const options = votes.map((voteCount, index) => ({
+			optionIndex: index,
+			votes: voteCount,
+			percentage:
+				totalVotes > 0
+					? Math.round((voteCount / totalVotes) * 100 * 10) / 10
+					: 0,
+		}));
+
+		return {
+			pollId,
+			name: data.name,
+			description: data.description,
+			totalVotes,
+			options,
+		};
+	} catch (error) {
+		console.error("Error parsing poll results:", error);
+		throw new Error("Failed to parse poll results from NFT");
+	}
+}
+
+// Add query options for poll results
+export const pollResultsQueryOptions = (pollId: string) =>
+	queryOptions({
+		queryKey: ["poll-results", pollId],
+		queryFn: () => {
+			// This will be populated by the mutation
+			throw new Error("Poll results not retrieved yet");
+		},
+		staleTime: Infinity, // Results don't change once retrieved
+		enabled: false, // Only enable after mutation success
+	});
+
+// Update the mutation to parse and store results
+export const useRetrieveResultsContractMutation = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (pollId: bigint) => {
+			const contract = queryClient.getQueryData<VotingSystemContract>([
+				"contract",
+			]);
+			if (!contract) throw new Error("Contract not initialized");
+
+			let tokenId: bigint = await contract.getResultsTokenId();
+
+			if (tokenId === 0n) {
+				const tx = await contract.retrieveResults(pollId);
+				const receipt = await tx.wait();
+
+				const ResultsRetrievedEventArgs = (
+					receipt?.logs.find(
+						(log) =>
+							(log as EventLog).eventName === "ResultsRetrieved"
+					) as EventLog
+				).args.toArray();
+
+				tokenId = ResultsRetrievedEventArgs[2] as bigint;
+			}
+
+			const uri = await contract.tokenURI(tokenId);
+			console.log("Raw URI:", uri);
+
+			// Parse the results
+			const parsedResults = parsePollResults(uri, pollId.toString());
+			console.log("Parsed results:", parsedResults);
+
+			return { tokenId, results: parsedResults };
+		},
+		onSuccess: (data, pollId) => {
+			// Store the parsed results in the query cache
+			queryClient.setQueryData(
+				["poll-results", pollId.toString()],
+				data.results
+			);
+
+			toast.success("Results retrieved successfully");
+			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+		},
+		onError: (error: Error) => {
+			console.error("Failed to retrieve results:", error);
+			toast.error(`Failed to retrieve results: ${error.message}`);
+		},
+	});
+};
+
+// Add a hook to get poll results
+export function usePollResults(pollId: string) {
+	return useQuery(pollResultsQueryOptions(pollId));
+}
+
+async function getResultClaimedStatus(
+	pollId: bigint,
+	userAddress: string,
+	contract?: VotingSystemContract
+) {
+	if (!contract || !userAddress) {
+		throw new Error("Contract not initialized or address not provided");
+	}
+
+	return await contract.hasUserClaimedResults(pollId, userAddress);
+}
+
+export const resultClaimedStatusQueryOptions = (
+	pollId: bigint,
+	userAddress: string,
+	contract?: VotingSystemContract
+) =>
+	queryOptions({
+		queryKey: ["result-claimed-status", pollId.toString(), userAddress],
+		queryFn: () => getResultClaimedStatus(pollId, userAddress, contract),
+		staleTime: 5 * 60 * 1000,
+		enabled: !!userAddress && !!contract && pollId > 0n,
+	});

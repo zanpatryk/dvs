@@ -89,6 +89,7 @@ const CreatePoll = () => {
 					new Date(data.endTime).getTime() - startTime.getTime()
 				),
 				maxUses: BigInt(data.participantLimit),
+				managerIncluded: data.managerIncluded,
 			});
 
 		if (createMutation.isError) {

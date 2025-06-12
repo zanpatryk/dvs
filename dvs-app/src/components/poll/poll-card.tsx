@@ -1,5 +1,4 @@
 import ViewResults from "@/components/poll/results";
-import ViewPoll from "@/components/poll/view";
 import VotePoll from "@/components/poll/vote";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -101,16 +100,18 @@ export function PollCard({
 				icon: <TrendingUp className="mr-2 h-4 w-4" />,
 				className: "bg-gray-600 hover:bg-gray-700",
 				disabled: false,
+				showDialog: true,
 			};
 		}
 
 		if (hasVoted) {
-			// User has voted but poll is still active - show their vote
+			// User has voted but poll is still active - disable button for security
 			return {
-				text: "View Your Vote",
+				text: "Results Available After Voting Ends",
 				icon: <Eye className="mr-2 h-4 w-4" />,
-				className: "bg-green-600 hover:bg-green-700",
-				disabled: false,
+				className: "bg-gray-400 cursor-not-allowed",
+				disabled: true,
+				showDialog: false,
 			};
 		}
 
@@ -120,6 +121,7 @@ export function PollCard({
 			icon: <CircleCheckBig className="mr-2 h-4 w-4" />,
 			className: "bg-blue-600 hover:bg-blue-700",
 			disabled: false,
+			showDialog: true,
 		};
 	};
 
@@ -178,26 +180,37 @@ export function PollCard({
 					<Separator />
 
 					{/* Action Button */}
-					<Dialog>
-						<DialogTrigger asChild>
-							<Button
-								className={cn("w-full", buttonConfig.className)}
-								disabled={buttonConfig.disabled}
-							>
-								{buttonConfig.icon}
-								{buttonConfig.text}
-							</Button>
-						</DialogTrigger>
-						<DialogContent>
-							{!isActive ? (
-								<ViewResults pollId={id} />
-							) : hasVoted ? (
-								<ViewPoll pollId={id} />
-							) : (
-								<VotePoll pollId={id} />
-							)}
-						</DialogContent>
-					</Dialog>
+					{buttonConfig.showDialog ? (
+						<Dialog>
+							<DialogTrigger asChild>
+								<Button
+									className={cn(
+										"w-full",
+										buttonConfig.className
+									)}
+									disabled={buttonConfig.disabled}
+								>
+									{buttonConfig.icon}
+									{buttonConfig.text}
+								</Button>
+							</DialogTrigger>
+							<DialogContent>
+								{!isActive ? (
+									<ViewResults pollId={id} />
+								) : (
+									<VotePoll pollId={id} />
+								)}
+							</DialogContent>
+						</Dialog>
+					) : (
+						<Button
+							className={cn("w-full", buttonConfig.className)}
+							disabled={buttonConfig.disabled}
+						>
+							{buttonConfig.icon}
+							{buttonConfig.text}
+						</Button>
+					)}
 				</div>
 			</CardContent>
 		</Card>

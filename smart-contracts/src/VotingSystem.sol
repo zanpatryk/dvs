@@ -2,13 +2,15 @@
 pragma solidity ^0.8.18;
 
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Poll} from "./Poll.sol";
 
 /**
  * @title VotingSystem
  * @notice Manages creation of polls, role-based access, and user participation via access codes.
  */
-contract VotingSystem is AccessControlEnumerable {
+contract VotingSystem is ERC721, ERC721URIStorage, AccessControlEnumerable {
     // Roles
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
@@ -19,6 +21,8 @@ contract VotingSystem is AccessControlEnumerable {
     mapping(uint256 => address) private s_polls;
     mapping(bytes32 => uint256) private s_accessCodes;
     mapping(address => uint256[]) private s_pollsByManager;
+    mapping(address => uint256) private s_tokenIds;
+    uint256 private s_tokenCounter;
 
     // Each code maps to a pollId; and we track how many uses remain
     mapping(bytes32 => uint256) private s_accessCodeUses;
@@ -32,13 +36,20 @@ contract VotingSystem is AccessControlEnumerable {
     event ResultsRetrieved(address indexed user, uint256 indexed pollId, uint256 tokenId);
     event AccessCodeGenerated(uint256 indexed pollId, bytes32 indexed code, uint256 maxUses);
 
-    constructor() {
+    modifier notAdmin(bytes32 role) {
+        require(!hasRole(ADMIN_ROLE, msg.sender), "notAdmin: caller must not be admin");
+        _;
+    }
+
+    constructor() ERC721("ParticipationNFT", "PNFT") {
         _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
         _setRoleAdmin(MANAGER_ROLE, ADMIN_ROLE);
         _setRoleAdmin(USER_ROLE, ADMIN_ROLE);
 
         // Grant roles to deployer and initial admins
         _grantRole(ADMIN_ROLE, msg.sender);
+
+        s_tokenCounter = 0;
     }
 
     /**
@@ -48,15 +59,18 @@ contract VotingSystem is AccessControlEnumerable {
      * @param _duration  Voting duration in seconds
      * @param _maxUses   Maximum nuber of uses per code
      */
-    function createPoll(string memory _title, string[] memory _options, uint256 _duration, uint256 _maxUses)
-        external
-        onlyRole(MANAGER_ROLE)
-    {
+    function createPoll(
+        string memory _title,
+        string[] memory _options,
+        uint256 _duration,
+        uint256 _maxUses,
+        bool includeManager
+    ) external onlyRole(MANAGER_ROLE) {
         require(_maxUses > 0, "VotingSystem: maxUses must be > 0");
 
         // Deploy new Poll with this contract as its manager
         Poll poll = new Poll(_title, _options, _duration);
-        uint256 pollId = ++s_pollCount;
+        uint256 pollId = ++s_pollCount + block.timestamp;
         s_polls[pollId] = address(poll);
         emit PollCreated(pollId, address(poll), _title);
 
@@ -71,6 +85,10 @@ contract VotingSystem is AccessControlEnumerable {
 
         Poll(address(poll)).start();
 
+        if (includeManager) {
+            Poll(address(poll)).addParticipant(msg.sender);
+        }
+
         emit AccessCodeGenerated(pollId, code, _maxUses);
     }
 
@@ -78,7 +96,7 @@ contract VotingSystem is AccessControlEnumerable {
      * @notice Join a poll by providing a valid access code.
      * @param _code The unique code provided by a manager
      */
-    function joinPoll(bytes32 _code) external {
+    function joinPoll(bytes32 _code) external notAdmin(ADMIN_ROLE) {
         uint256 pollId = s_accessCodes[_code];
         require(pollId != 0, "VotingSystem: invalid code");
 
@@ -105,7 +123,7 @@ contract VotingSystem is AccessControlEnumerable {
      * @param _pollId The target poll ID
      * @param _option Option index to vote for
      */
-    function castVote(uint256 _pollId, uint256 _option) external {
+    function castVote(uint256 _pollId, uint256 _option) external notAdmin(ADMIN_ROLE) {
         address pollAddress = s_polls[_pollId];
         require(pollAddress != address(0), "VotingSystem: invalid pollId");
 
@@ -144,12 +162,11 @@ contract VotingSystem is AccessControlEnumerable {
 
     /// @notice After a poll is ended, mint a results-NFT to the caller
     /// @param pollId  The ID of the poll whose results to retrieve
-    function retrieveResults(uint256 pollId) external onlyRole(USER_ROLE) {
+    function retrieveResults(uint256 pollId) external notAdmin(ADMIN_ROLE) {
         require(s_polls[pollId] != address(0), "Invalid pollId");
         require(!s_resultsClaimed[pollId][msg.sender], "Already claimed");
 
         Poll poll = Poll(s_polls[pollId]);
-
         uint256[] memory votes = poll.getResults();
 
         string memory csv;
@@ -173,7 +190,16 @@ contract VotingSystem is AccessControlEnumerable {
             )
         );
 
-        //emit ResultsRetrieved(msg.sender, pollId, tokenId);
+        uint256 tokenId = ++s_tokenCounter;
+        _safeMint(msg.sender, tokenId);
+
+        _setTokenURI(tokenId, uri);
+
+        s_resultsClaimed[pollId][msg.sender] = true;
+
+        s_tokenIds[msg.sender] = tokenId;
+
+        emit ResultsRetrieved(msg.sender, pollId, tokenId);
     }
 
     /// @dev Convert uint256 → string (used for on-chain metadata)
@@ -212,6 +238,10 @@ contract VotingSystem is AccessControlEnumerable {
         return s_pollCount;
     }
 
+    function isUser(address account) external view returns (bool) {
+        return hasRole(USER_ROLE, account);
+    }
+
     function isManager(address account) external view returns (bool) {
         return hasRole(MANAGER_ROLE, account);
     }
@@ -229,5 +259,36 @@ contract VotingSystem is AccessControlEnumerable {
         require(pollAddress != address(0), "VotingSystem: invalid pollId");
 
         return Poll(pollAddress).hasVoted(_user);
+    }
+
+    function hasUserClaimedResults(uint256 _pollId, address _user) external view returns (bool) {
+        return s_resultsClaimed[_pollId][_user];
+    }
+
+    function getResultsTokenId() external view returns (uint256) {
+        return s_tokenIds[msg.sender];
+    }
+
+    //=======================================================================
+    // Setters
+    //=======================================================================
+
+    function grantUserRole(address account) external {
+        _grantRole(USER_ROLE, account);
+    }
+
+    // Explicitly override tokenURI to resolve inheritance ambiguity
+    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+        return super.tokenURI(tokenId);
+    }
+
+    // Explicitly override supportsInterface to resolve inheritance ambiguity
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, AccessControlEnumerable, ERC721URIStorage)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }

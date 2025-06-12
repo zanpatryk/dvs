@@ -57,7 +57,7 @@ contract PollTest is Test {
         poll.start();
 
         vm.prank(participant1);
-        poll.castVote(0); // Vote for Option A
+        poll.castVote(participant1, 0); // Vote for Option A
 
         assertTrue(poll.s_hasVoted(participant1));
         assertEq(poll.s_votes(0), 1);
@@ -71,11 +71,11 @@ contract PollTest is Test {
         poll.start();
 
         vm.prank(participant1);
-        poll.castVote(1);
+        poll.castVote(participant1, 1);
 
         vm.prank(participant1);
         vm.expectRevert("Poll: already voted");
-        poll.castVote(1);
+        poll.castVote(participant1, 1);
     }
 
     function testCannotVoteWithoutRegistration() public {
@@ -84,7 +84,7 @@ contract PollTest is Test {
 
         vm.prank(participant2);
         vm.expectRevert("Poll: not registered");
-        poll.castVote(0);
+        poll.castVote(participant2, 0);
     }
 
     function testEndPoll() public {
@@ -99,7 +99,7 @@ contract PollTest is Test {
 
         vm.prank(participant1);
         vm.expectRevert(Poll.Poll__NotExpectedState.selector);
-        poll.castVote(1);
+        poll.castVote(participant1, 1);
     }
 
     function testGetResultsAfterEnd() public {
@@ -110,7 +110,7 @@ contract PollTest is Test {
         poll.start();
 
         vm.prank(participant1);
-        poll.castVote(2);
+        poll.castVote(manager, 2);
 
         vm.prank(manager);
         poll.end();
