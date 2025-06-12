@@ -56,7 +56,7 @@ contract VotingSystem is AccessControlEnumerable {
 
         // Deploy new Poll with this contract as its manager
         Poll poll = new Poll(_title, _options, _duration);
-        uint256 pollId = ++s_pollCount;
+        uint256 pollId = ++s_pollCount + block.timestamp;
         s_polls[pollId] = address(poll);
         emit PollCreated(pollId, address(poll), _title);
 
