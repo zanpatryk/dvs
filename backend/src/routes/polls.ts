@@ -3,7 +3,6 @@ import { and, count, eq, getTableColumns } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db";
-import { seedTable } from "../db/schema/code-seed";
 import {
 	pollsInsertSchema,
 	pollsOptionsTable,
@@ -13,19 +12,30 @@ import {
 import type { Variables } from "./auth";
 
 const PollInsertSchema = z.object({
+	id: z.string().refine((val) => {
+		try {
+			BigInt(val);
+			return true;
+		} catch {
+			return false;
+		}
+	}),
+	address: z.string().length(42).startsWith("0x"),
+	accessCode: z.string().length(66).startsWith("0x"),
 	title: z.string().min(1),
 	description: z.string(),
 	options: z
 		.array(z.object({ value: z.string().min(1) }))
 		.min(1)
 		.max(10),
+	startTime: z.string().refine((val) => !isNaN(Date.parse(val))),
 	endTime: z.string().refine((val) => !isNaN(Date.parse(val))),
 	managerIncluded: z.boolean(),
 	participantLimit: z.number().min(1),
 });
 
 const JoinPollSchema = z.object({
-	code: z.string().min(6),
+	code: z.string().min(66).startsWith("0x"),
 });
 
 export const pollsRoute = new Hono<{ Variables: Variables }>()
@@ -36,27 +46,27 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 
 		const poll = c.req.valid("json");
 
-		const pollid = Date.now().toString();
+		// const pollid = Date.now().toString();
 
-		const pollCode = await db.transaction(async (tx) => {
-			const [row] = await tx.select().from(seedTable).limit(1);
-			if (!row) throw new Error("Seed row not found");
+		// const pollCode = await db.transaction(async (tx) => {
+		// 	const [row] = await tx.select().from(seedTable).limit(1);
+		// 	if (!row) throw new Error("Seed row not found");
 
-			const currentSeed = row.seed;
+		// 	const currentSeed = row.seed;
 
-			await tx.update(seedTable).set({ seed: currentSeed + 1 });
+		// 	await tx.update(seedTable).set({ seed: currentSeed + 1 });
 
-			return currentSeed;
-		});
+		// 	return currentSeed;
+		// });
 
 		const polldb = pollsInsertSchema.parse({
-			id: pollid,
+			id: poll.id,
 			creatorAddress: address,
 			title: poll.title,
 			description: poll.description,
 			participantLimit: poll.participantLimit,
-			accessCode: pollCode.toString().padStart(6, "0"),
-			startTime: new Date(),
+			accessCode: poll.accessCode,
+			startTime: new Date(poll.startTime),
 			endTime: new Date(poll.endTime),
 		});
 
@@ -73,7 +83,7 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 		poll.options.map(async (option) => {
 			const responseOption = await db
 				.insert(pollsOptionsTable)
-				.values({ pollId: pollid, option: option.value })
+				.values({ pollId: poll.id, option: option.value })
 				.returning()
 				.then((res) => res[0]);
 
@@ -88,7 +98,7 @@ export const pollsRoute = new Hono<{ Variables: Variables }>()
 			const participant = await db
 				.insert(pollsParticipantsTable)
 				.values({
-					pollId: pollid,
+					pollId: poll.id,
 					participantAddress: address,
 				})
 				.returning()
