@@ -21,6 +21,7 @@ contract VotingSystem is ERC721, ERC721URIStorage, AccessControlEnumerable {
     mapping(uint256 => address) private s_polls;
     mapping(bytes32 => uint256) private s_accessCodes;
     mapping(address => uint256[]) private s_pollsByManager;
+    mapping(address => uint256) private s_tokenIds;
     uint256 private s_tokenCounter;
 
     // Each code maps to a pollId; and we track how many uses remain
@@ -196,6 +197,8 @@ contract VotingSystem is ERC721, ERC721URIStorage, AccessControlEnumerable {
 
         s_resultsClaimed[pollId][msg.sender] = true;
 
+        s_tokenIds[msg.sender] = tokenId;
+
         emit ResultsRetrieved(msg.sender, pollId, tokenId);
     }
 
@@ -235,6 +238,10 @@ contract VotingSystem is ERC721, ERC721URIStorage, AccessControlEnumerable {
         return s_pollCount;
     }
 
+    function isUser(address account) external view returns (bool) {
+        return hasRole(USER_ROLE, account);
+    }
+
     function isManager(address account) external view returns (bool) {
         return hasRole(MANAGER_ROLE, account);
     }
@@ -252,6 +259,14 @@ contract VotingSystem is ERC721, ERC721URIStorage, AccessControlEnumerable {
         require(pollAddress != address(0), "VotingSystem: invalid pollId");
 
         return Poll(pollAddress).hasVoted(_user);
+    }
+
+    function hasUserClaimedResults(uint256 _pollId, address _user) external view returns (bool) {
+        return s_resultsClaimed[_pollId][_user];
+    }
+
+    function getResultsTokenId() external view returns (uint256) {
+        return s_tokenIds[msg.sender];
     }
 
     //=======================================================================
