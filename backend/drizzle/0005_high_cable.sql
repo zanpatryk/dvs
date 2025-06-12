@@ -1,0 +1,1 @@
+ALTER TABLE "polls" ALTER COLUMN "access_code" SET DATA TYPE varchar(66);
