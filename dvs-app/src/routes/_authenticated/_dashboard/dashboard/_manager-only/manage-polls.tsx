@@ -74,7 +74,11 @@ function LoadingSkeleton() {
 
 function RouteComponent() {
 	const { isPending, error, data } = useQuery(createdPollsQueryOptions);
-	const createdPolls = data || [];
+	const createdPolls = (data || []).map((poll) => ({
+		...poll,
+		startTime: new Date(poll.startTime),
+		endTime: new Date(poll.endTime),
+	}));
 
 	return (
 		<div className="h-full flex flex-col">

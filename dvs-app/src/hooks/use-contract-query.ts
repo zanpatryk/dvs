@@ -3,10 +3,11 @@ import { getEthereumProvider } from "@/lib/ethereum";
 import {
 	queryOptions,
 	useMutation,
+	useQueries,
 	useQuery,
 	useQueryClient,
 } from "@tanstack/react-query";
-import { ethers } from "ethers";
+import { ethers, EventLog } from "ethers";
 import { toast } from "sonner";
 
 const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
@@ -131,5 +132,208 @@ export function useChangeUserRoleMutation() {
 			console.error("Failed to change user role:", error);
 			toast.error(`Failed to change user role: ${error.message}`);
 		},
+	});
+}
+
+async function getTotalPolls(contract?: VotingSystemContract) {
+	if (!contract) {
+		throw new Error("Contract not initialized");
+	}
+
+	return await contract.totalPolls();
+}
+
+export const totalPollsQueryOptions = (contract?: VotingSystemContract) =>
+	queryOptions({
+		queryKey: ["total-polls"],
+		queryFn: () => getTotalPolls(contract),
+		staleTime: 5 * 60 * 1000,
+		enabled: !!contract,
+	});
+
+export function useCreatePollContractMutation() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async ({
+			title,
+			options,
+			duration,
+			maxUses,
+		}: {
+			title: string;
+			options: string[];
+			duration: bigint;
+			maxUses: bigint;
+		}) => {
+			const contract = queryClient.getQueryData<VotingSystemContract>([
+				"contract",
+			]);
+			if (!contract) throw new Error("Contract not initialized");
+
+			const tx = await contract.createPoll(
+				title,
+				options,
+				duration,
+				maxUses
+			);
+
+			// return await tx.wait();
+			const receipt = await tx.wait();
+			console.log(receipt);
+
+			const PollCreatedEventArgs = (
+				receipt?.logs.find(
+					(log) => (log as EventLog).eventName === "PollCreated"
+				) as EventLog
+			).args.toArray();
+
+			const AccessCodeGeneratedEventArgs = (
+				receipt?.logs.find(
+					(log) =>
+						(log as EventLog).eventName === "AccessCodeGenerated"
+				) as EventLog
+			).args.toArray();
+
+			const pollId = PollCreatedEventArgs[0] as bigint;
+			const pollAddress = PollCreatedEventArgs[1] as string;
+			const accessCode = AccessCodeGeneratedEventArgs[1] as string;
+
+			return { pollId, pollAddress, accessCode };
+		},
+		onSuccess: (data) => {
+			toast.success(
+				`Poll with ID: ${data.pollId} created successfully!\n Address: ${data.pollAddress}\n Access Code: ${data.accessCode}`
+			);
+		},
+		onError: (error: Error) => {
+			console.error("Failed to create poll:", error);
+			toast.error(`Failed to create poll: ${error.message}`);
+		},
+	});
+}
+
+// export function useStartPollContractMutation() {
+// 	const queryClient = useQueryClient();
+
+// 	return useMutation({
+// 		mutationFn: async (pollId: bigint) => {
+// 			const contract = queryClient.getQueryData<VotingSystemContract>([
+// 				"contract",
+// 			]);
+// 			if (!contract) throw new Error("Contract not initialized");
+
+// 			const tx = await contract.startPoll(pollId);
+// 			return await tx.wait();
+// 		},
+// 		onSuccess: () => {
+// 			toast.success("Poll started successfully");
+// 			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+// 		},
+// 		onError: (error: Error) => {
+// 			console.error("Failed to start poll:", error);
+// 			toast.error(`Failed to start poll: ${error.message}`);
+// 		},
+// 	});
+// }
+
+export function useJoinPollContractMutation() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (accessCode: string) => {
+			const contract = queryClient.getQueryData<VotingSystemContract>([
+				"contract",
+			]);
+			if (!contract) throw new Error("Contract not initialized");
+
+			const tx = await contract.joinPoll(accessCode);
+			return await tx.wait();
+		},
+		onSuccess: () => {
+			toast.success("Joined poll successfully via contract");
+			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+		},
+		onError: (error: Error) => {
+			console.error("Failed to join poll:", error);
+			toast.error(`Failed to join poll: ${error.message}`);
+		},
+	});
+}
+
+export function useCastVoteContractMutation() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async ({
+			pollId,
+			optionIndex,
+		}: {
+			pollId: bigint;
+			optionIndex: bigint;
+		}) => {
+			const contract = queryClient.getQueryData<VotingSystemContract>([
+				"contract",
+			]);
+			if (!contract) throw new Error("Contract not initialized");
+
+			const tx = await contract.castVote(pollId, optionIndex);
+			return await tx.wait();
+		},
+		onSuccess: (_, variables) => {
+			toast.success("Vote cast successfully");
+
+			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+			queryClient.invalidateQueries({
+				queryKey: ["user-vote-status", variables.pollId.toString()],
+			});
+		},
+		onError: (error: Error) => {
+			console.error("Failed to cast vote:", error);
+			toast.error(`Failed to cast vote: ${error.message}`);
+		},
+	});
+}
+
+async function getUserVoteStatus(
+	pollId: bigint,
+	userAddress: string,
+	contract?: VotingSystemContract
+) {
+	if (!contract || !userAddress) {
+		throw new Error("Contract not initialized or address not provided");
+	}
+
+	return await contract.hasUserVoted(pollId, userAddress);
+}
+
+export const userVoteStatusQueryOptions = (
+	pollId: bigint,
+	userAddress: string,
+	contract?: VotingSystemContract
+) =>
+	queryOptions({
+		queryKey: ["user-vote-status", pollId.toString(), userAddress],
+		queryFn: () => getUserVoteStatus(pollId, userAddress, contract),
+		staleTime: 5 * 60 * 1000,
+		enabled: !!userAddress && !!contract && pollId > 0n,
+	});
+
+export function useUserVoteStatus(pollId: bigint, userAddress: string) {
+	const { data: contract } = useContract();
+
+	return useQuery(userVoteStatusQueryOptions(pollId, userAddress, contract));
+}
+
+export function useMultipleUserVoteStatus(
+	pollIds: bigint[],
+	userAddress: string
+) {
+	const { data: contract } = useContract();
+
+	return useQueries({
+		queries: pollIds.map((pollId) =>
+			userVoteStatusQueryOptions(pollId, userAddress, contract)
+		),
 	});
 }

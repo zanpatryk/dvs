@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 
 let providerInstance: ethers.BrowserProvider | null = null;
 
-export async function getEthereumProvider(): Promise<ethers.BrowserProvider | null> {
+export async function getEthereumProvider() {
 	try {
 		if (typeof window === "undefined" || !window.ethereum) {
 			console.warn("Ethereum provider not available");

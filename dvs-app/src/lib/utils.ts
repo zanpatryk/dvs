@@ -6,11 +6,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(date: Date) {
-	return new Intl.DateTimeFormat("pl-PL", {
-		dateStyle: "short",
-		timeStyle: "short",
-		timeZone: "Europe/Warsaw",
-	}).format(date);
+	try {
+		return new Intl.DateTimeFormat("pl-PL", {
+			dateStyle: "short",
+			timeStyle: "short",
+			timeZone: "Europe/Warsaw",
+		}).format(date);
+	} catch {
+		return null;
+	}
 }
 
 export const formatAddress = (address: string) => {

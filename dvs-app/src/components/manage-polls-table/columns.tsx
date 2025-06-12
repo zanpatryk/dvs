@@ -7,24 +7,47 @@ import {
 	DialogContent,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { formatDate } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { FileSearch } from "lucide-react";
+import { Poll } from "../../../../backend/src/db/schema/polls";
 
-export const columns: ColumnDef<{
-	id: string;
-	creatorAddress: string;
-	title: string;
-	description: string;
-	participantLimit: number;
-	accessCode: string;
-	startTime: string;
-	endTime: string | null;
-	hasEndedPrematurely: boolean | null;
-}>[] = [
+export const columns: ColumnDef<Poll>[] = [
 	{
 		accessorKey: "id",
-		header: "UUID",
+		header: "ID",
+	},
+	{
+		accessorKey: "accessCode",
+		header: "Access Code",
+		cell: ({ row }) => {
+			const accessCode = row.getValue("accessCode") as string;
+			return (
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<span
+								onClick={() =>
+									navigator.clipboard.writeText(accessCode)
+								}
+								className="font-mono border rounded-md p-1"
+							>
+								{accessCode}
+							</span>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p>Click to copy the Access Code</p>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			);
+		},
 	},
 	{
 		accessorKey: "title",
@@ -40,19 +63,17 @@ export const columns: ColumnDef<{
 	},
 	{
 		accessorKey: "startTime",
-		header: "Creation Date",
-		cell: ({ row }) =>
-			formatDate(new Date(row.getValue("startTime") as string)),
+		header: "Start Date",
+		cell: ({ row }) => formatDate(row.getValue("startTime")),
 	},
 	{
 		accessorKey: "endTime",
 		header: "End Time",
-		cell: ({ row }) =>
-			formatDate(new Date(row.getValue("endTime") as string)),
+		cell: ({ row }) => formatDate(row.getValue("endTime")),
 	},
 	{
-		accessorKey: "participants",
-		header: "Participants",
+		accessorKey: "participantLimit",
+		header: "Max Participants",
 	},
 	{
 		accessorKey: "hasEndedPrematurely",
@@ -133,9 +154,7 @@ export const columns: ColumnDef<{
 								<DialogClose asChild>
 									<Button variant="outline">Cancel</Button>
 								</DialogClose>
-								<EndPollButton pollId={pollId}>
-									Confirm
-								</EndPollButton>
+								<EndPollButton pollId={pollId} />
 							</div>
 						</div>
 					</DialogContent>
