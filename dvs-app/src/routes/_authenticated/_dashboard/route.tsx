@@ -1,6 +1,5 @@
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import { Forbidden } from "@/components/dashboard/forbidden";
-import { StatsCard } from "@/components/dashboard/stats";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -9,7 +8,6 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { StatsData } from "@/dummy/data";
 import { UserRole } from "@/hooks/use-contract-query";
 import {
 	createFileRoute,
@@ -66,7 +64,7 @@ function RouteComponent() {
 
 						<div className="flex-1 p-6 bg-gray-100 overflow-hidden flex flex-col">
 							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 flex-shrink-0">
-								{StatsData.map((stat) => (
+								{/* {StatsData.map((stat) => (
 									<StatsCard
 										key={stat.title}
 										title={stat.title}
@@ -77,7 +75,7 @@ function RouteComponent() {
 											)
 										}
 									/>
-								))}
+								))} */}
 							</div>
 							<div className="flex-1 min-h-0">
 								<Outlet />
