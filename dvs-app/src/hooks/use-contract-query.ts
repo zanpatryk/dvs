@@ -60,6 +60,11 @@ async function getUserRole(address?: string, contract?: VotingSystemContract) {
 
 	if (isAdmin) return UserRole.Admin;
 	if (isManager) return UserRole.Manager;
+
+	const tx = await contract.grantUserRole(address);
+
+	await tx.wait();
+
 	return UserRole.User;
 }
 
