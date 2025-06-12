@@ -1,7 +1,11 @@
 import { TypedContract } from "ethers-abitype";
 
 export const VotingSystemAbi = [
-	{ type: "constructor", inputs: [], stateMutability: "nonpayable" },
+	{
+		type: "constructor",
+		inputs: [],
+		stateMutability: "nonpayable",
+	},
 	{
 		type: "function",
 		name: "ADMIN_ROLE",
@@ -34,8 +38,16 @@ export const VotingSystemAbi = [
 		type: "function",
 		name: "castVote",
 		inputs: [
-			{ name: "_pollId", type: "uint256", internalType: "uint256" },
-			{ name: "_option", type: "uint256", internalType: "uint256" },
+			{
+				name: "_pollId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+			{
+				name: "_option",
+				type: "uint256",
+				internalType: "uint256",
+			},
 		],
 		outputs: [],
 		stateMutability: "nonpayable",
@@ -44,8 +56,16 @@ export const VotingSystemAbi = [
 		type: "function",
 		name: "changeUserRole",
 		inputs: [
-			{ name: "_account", type: "address", internalType: "address" },
-			{ name: "_role", type: "bytes32", internalType: "bytes32" },
+			{
+				name: "_account",
+				type: "address",
+				internalType: "address",
+			},
+			{
+				name: "_role",
+				type: "bytes32",
+				internalType: "bytes32",
+			},
 		],
 		outputs: [],
 		stateMutability: "nonpayable",
@@ -54,14 +74,26 @@ export const VotingSystemAbi = [
 		type: "function",
 		name: "createPoll",
 		inputs: [
-			{ name: "_title", type: "string", internalType: "string" },
+			{
+				name: "_title",
+				type: "string",
+				internalType: "string",
+			},
 			{
 				name: "_options",
 				type: "string[]",
 				internalType: "string[]",
 			},
-			{ name: "_duration", type: "uint256", internalType: "uint256" },
-			{ name: "_maxUses", type: "uint256", internalType: "uint256" },
+			{
+				name: "_duration",
+				type: "uint256",
+				internalType: "uint256",
+			},
+			{
+				name: "_maxUses",
+				type: "uint256",
+				internalType: "uint256",
+			},
 		],
 		outputs: [],
 		stateMutability: "nonpayable",
@@ -69,28 +101,52 @@ export const VotingSystemAbi = [
 	{
 		type: "function",
 		name: "endPoll",
-		inputs: [{ name: "_pollId", type: "uint256", internalType: "uint256" }],
+		inputs: [
+			{
+				name: "_pollId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+		],
 		outputs: [],
 		stateMutability: "nonpayable",
 	},
 	{
 		type: "function",
 		name: "getAccessCodePollId",
-		inputs: [{ name: "_code", type: "bytes32", internalType: "bytes32" }],
+		inputs: [
+			{
+				name: "_code",
+				type: "bytes32",
+				internalType: "bytes32",
+			},
+		],
 		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
 		stateMutability: "view",
 	},
 	{
 		type: "function",
 		name: "getPollAddress",
-		inputs: [{ name: "_pollId", type: "uint256", internalType: "uint256" }],
+		inputs: [
+			{
+				name: "_pollId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+		],
 		outputs: [{ name: "", type: "address", internalType: "address" }],
 		stateMutability: "view",
 	},
 	{
 		type: "function",
 		name: "getPollsByManager",
-		inputs: [{ name: "manager", type: "address", internalType: "address" }],
+		inputs: [
+			{
+				name: "manager",
+				type: "address",
+				internalType: "address",
+			},
+		],
 		outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
 		stateMutability: "view",
 	},
@@ -105,8 +161,16 @@ export const VotingSystemAbi = [
 		type: "function",
 		name: "getRoleMember",
 		inputs: [
-			{ name: "role", type: "bytes32", internalType: "bytes32" },
-			{ name: "index", type: "uint256", internalType: "uint256" },
+			{
+				name: "role",
+				type: "bytes32",
+				internalType: "bytes32",
+			},
+			{
+				name: "index",
+				type: "uint256",
+				internalType: "uint256",
+			},
 		],
 		outputs: [{ name: "", type: "address", internalType: "address" }],
 		stateMutability: "view",
@@ -129,8 +193,16 @@ export const VotingSystemAbi = [
 		type: "function",
 		name: "grantRole",
 		inputs: [
-			{ name: "role", type: "bytes32", internalType: "bytes32" },
-			{ name: "account", type: "address", internalType: "address" },
+			{
+				name: "role",
+				type: "bytes32",
+				internalType: "bytes32",
+			},
+			{
+				name: "account",
+				type: "address",
+				internalType: "address",
+			},
 		],
 		outputs: [],
 		stateMutability: "nonpayable",
@@ -139,8 +211,34 @@ export const VotingSystemAbi = [
 		type: "function",
 		name: "hasRole",
 		inputs: [
-			{ name: "role", type: "bytes32", internalType: "bytes32" },
-			{ name: "account", type: "address", internalType: "address" },
+			{
+				name: "role",
+				type: "bytes32",
+				internalType: "bytes32",
+			},
+			{
+				name: "account",
+				type: "address",
+				internalType: "address",
+			},
+		],
+		outputs: [{ name: "", type: "bool", internalType: "bool" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
+		name: "hasUserVoted",
+		inputs: [
+			{
+				name: "_pollId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+			{
+				name: "_user",
+				type: "address",
+				internalType: "address",
+			},
 		],
 		outputs: [{ name: "", type: "bool", internalType: "bool" }],
 		stateMutability: "view",
@@ -148,21 +246,39 @@ export const VotingSystemAbi = [
 	{
 		type: "function",
 		name: "isAdmin",
-		inputs: [{ name: "account", type: "address", internalType: "address" }],
+		inputs: [
+			{
+				name: "account",
+				type: "address",
+				internalType: "address",
+			},
+		],
 		outputs: [{ name: "", type: "bool", internalType: "bool" }],
 		stateMutability: "view",
 	},
 	{
 		type: "function",
 		name: "isManager",
-		inputs: [{ name: "account", type: "address", internalType: "address" }],
+		inputs: [
+			{
+				name: "account",
+				type: "address",
+				internalType: "address",
+			},
+		],
 		outputs: [{ name: "", type: "bool", internalType: "bool" }],
 		stateMutability: "view",
 	},
 	{
 		type: "function",
 		name: "joinPoll",
-		inputs: [{ name: "_code", type: "bytes32", internalType: "bytes32" }],
+		inputs: [
+			{
+				name: "_code",
+				type: "bytes32",
+				internalType: "bytes32",
+			},
+		],
 		outputs: [],
 		stateMutability: "nonpayable",
 	},
@@ -170,7 +286,11 @@ export const VotingSystemAbi = [
 		type: "function",
 		name: "renounceRole",
 		inputs: [
-			{ name: "role", type: "bytes32", internalType: "bytes32" },
+			{
+				name: "role",
+				type: "bytes32",
+				internalType: "bytes32",
+			},
 			{
 				name: "callerConfirmation",
 				type: "address",
@@ -183,7 +303,13 @@ export const VotingSystemAbi = [
 	{
 		type: "function",
 		name: "retrieveResults",
-		inputs: [{ name: "pollId", type: "uint256", internalType: "uint256" }],
+		inputs: [
+			{
+				name: "pollId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+		],
 		outputs: [],
 		stateMutability: "nonpayable",
 	},
@@ -191,16 +317,17 @@ export const VotingSystemAbi = [
 		type: "function",
 		name: "revokeRole",
 		inputs: [
-			{ name: "role", type: "bytes32", internalType: "bytes32" },
-			{ name: "account", type: "address", internalType: "address" },
+			{
+				name: "role",
+				type: "bytes32",
+				internalType: "bytes32",
+			},
+			{
+				name: "account",
+				type: "address",
+				internalType: "address",
+			},
 		],
-		outputs: [],
-		stateMutability: "nonpayable",
-	},
-	{
-		type: "function",
-		name: "startPoll",
-		inputs: [{ name: "_pollId", type: "uint256", internalType: "uint256" }],
 		outputs: [],
 		stateMutability: "nonpayable",
 	},
@@ -208,7 +335,11 @@ export const VotingSystemAbi = [
 		type: "function",
 		name: "supportsInterface",
 		inputs: [
-			{ name: "interfaceId", type: "bytes4", internalType: "bytes4" },
+			{
+				name: "interfaceId",
+				type: "bytes4",
+				internalType: "bytes4",
+			},
 		],
 		outputs: [{ name: "", type: "bool", internalType: "bool" }],
 		stateMutability: "view",
@@ -238,25 +369,6 @@ export const VotingSystemAbi = [
 			},
 			{
 				name: "maxUses",
-				type: "uint256",
-				indexed: false,
-				internalType: "uint256",
-			},
-		],
-		anonymous: false,
-	},
-	{
-		type: "event",
-		name: "AccessCodesGenerated",
-		inputs: [
-			{
-				name: "pollId",
-				type: "uint256",
-				indexed: true,
-				internalType: "uint256",
-			},
-			{
-				name: "count",
 				type: "uint256",
 				indexed: false,
 				internalType: "uint256",
@@ -408,12 +520,20 @@ export const VotingSystemAbi = [
 		],
 		anonymous: false,
 	},
-	{ type: "error", name: "AccessControlBadConfirmation", inputs: [] },
+	{
+		type: "error",
+		name: "AccessControlBadConfirmation",
+		inputs: [],
+	},
 	{
 		type: "error",
 		name: "AccessControlUnauthorizedAccount",
 		inputs: [
-			{ name: "account", type: "address", internalType: "address" },
+			{
+				name: "account",
+				type: "address",
+				internalType: "address",
+			},
 			{
 				name: "neededRole",
 				type: "bytes32",

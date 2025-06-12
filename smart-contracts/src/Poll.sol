@@ -66,7 +66,7 @@ contract Poll {
      * @param _duration Duration in seconds for which the poll runs once started
      */
     constructor(string memory _title, string[] memory _options, uint256 _duration) {
-        if (_options.length <= 2) {
+        if (_options.length < 2) {
             revert Poll__OptionCountMustBeGreaterThanTwo();
         }
 
@@ -99,7 +99,7 @@ contract Poll {
      * @notice Add a participant (whitelist) before poll starts.
      * @param _participant Address to register
      */
-    function addParticipant(address _participant) external onlyManager inState(State.CREATED) {
+    function addParticipant(address _participant) external onlyManager {
         require(!s_isRegistered[_participant], "Poll: already registered");
         s_isRegistered[_participant] = true;
         s_participantList.push(_participant);
@@ -113,8 +113,8 @@ contract Poll {
      */
     function castVote(address _voter, uint256 _option) external inState(State.ACTIVE) {
         require(block.timestamp <= s_endTime, "Poll: voting period over");
-        require(s_isRegistered[msg.sender], "Poll: not registered");
-        require(!s_hasVoted[msg.sender], "Poll: already voted");
+        require(s_isRegistered[_voter], "Poll: not registered");
+        require(!s_hasVoted[_voter], "Poll: already voted");
         require(_option < s_options.length, "Poll: invalid option");
 
         s_hasVoted[_voter] = true;
@@ -170,5 +170,12 @@ contract Poll {
      */
     function getRegisteredParticipants() external view returns (address[] memory) {
         return s_participantList;
+    }
+
+    /**
+     * @notice Retrieve the information weather a participant has voted already
+     */
+    function hasVoted(address _voter) external view returns (bool) {
+        return s_hasVoted[_voter];
     }
 }
