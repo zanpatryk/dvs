@@ -1,8 +1,8 @@
 import JoinPoll from "@/components/poll/join";
 import { PollCard } from "@/components/poll/poll-card";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMultipleUserVoteStatus } from "@/hooks/use-contract-query";
 import { pollsQueryOptions } from "@/lib/api";
 import { DashboardHeaderAction } from "@/routes/_authenticated/_dashboard/route";
 import { useQuery } from "@tanstack/react-query";
@@ -76,24 +76,59 @@ function LoadingSkeleton() {
 
 function RouteComponent() {
 	const { isPending, error, data } = useQuery(pollsQueryOptions);
+	const { address } = Route.useRouteContext();
+
+	// Get poll IDs for vote status check
+	const pollIds = data?.map((poll) => BigInt(poll.id)) || [];
+	const voteStatuses = useMultipleUserVoteStatus(pollIds, address || "");
+
+	// Helper function to get vote status for a poll
+	const getUserVoteStatus = (pollId: string) => {
+		const pollIndex = pollIds.findIndex((id) => id.toString() === pollId);
+		if (pollIndex === -1) return { data: false, isLoading: true };
+
+		const statusQuery = voteStatuses[pollIndex];
+		return {
+			data: statusQuery?.data || false,
+			isLoading: statusQuery?.isLoading || false,
+		};
+	};
+
+	// Helper function to check if poll is actually active (time-wise)
+	const isPollTimeActive = (poll: NonNullable<typeof data>[0]) => {
+		const endTime = poll.endTime ? new Date(poll.endTime) : null;
+		return (
+			(!endTime || endTime.getTime() > Date.now()) &&
+			!poll.hasEndedPrematurely
+		);
+	};
 
 	const activePolls =
 		data?.filter((poll) => {
-			const endTime = poll.endTime ? new Date(poll.endTime) : null;
-			return (
-				(!endTime || endTime.getTime() > Date.now()) &&
-				!poll.hasEndedPrematurely
-			);
+			const voteStatus = getUserVoteStatus(poll.id);
+			const isTimeActive = isPollTimeActive(poll);
+			const hasNotVoted = !voteStatus.data;
+
+			// Poll is active if:
+			// 1. It hasn't ended by time AND hasn't ended prematurely
+			// 2. AND user hasn't voted yet
+			return isTimeActive && hasNotVoted;
 		}) || [];
 
 	const completedPolls =
 		data?.filter((poll) => {
-			const endTime = poll.endTime ? new Date(poll.endTime) : null;
-			return (
-				(endTime && endTime.getTime() <= Date.now()) ||
-				poll.hasEndedPrematurely
-			);
+			const voteStatus = getUserVoteStatus(poll.id);
+			const isTimeActive = isPollTimeActive(poll);
+			const hasVoted = voteStatus.data;
+
+			// Poll is completed if:
+			// 1. It has ended by time OR ended prematurely
+			// 2. OR user has already voted
+			return !isTimeActive || hasVoted;
 		}) || [];
+
+	// Check if any vote status is still loading
+	const isVoteStatusLoading = voteStatuses.some((status) => status.isLoading);
 
 	return (
 		<div className="h-full flex flex-col">
@@ -109,21 +144,15 @@ function RouteComponent() {
 			<div className="flex-1 grid grid-cols-1 xl:grid-cols-2 gap-8 min-h-0">
 				{/* Active Polls */}
 				<div className="flex flex-col min-h-0">
-					<div className="flex items-center justify-between mb-4 flex-shrink-0">
+					<div className="mb-4 flex-shrink-0">
 						<h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
 							<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
 							Active Polls
 						</h2>
-						<Badge
-							variant="outline"
-							className="text-green-700 border-green-200"
-						>
-							{activePolls.length} active
-						</Badge>
 					</div>
 
 					<div className="flex-1 overflow-y-auto space-y-4 pr-2">
-						{isPending ? (
+						{isPending || isVoteStatusLoading ? (
 							<LoadingSkeleton />
 						) : error !== null &&
 						  !error.message.includes("No polls found") ? (
@@ -133,45 +162,44 @@ function RouteComponent() {
 						) : activePolls.length === 0 ? (
 							<EmptyState
 								title="No Active Polls"
-								description="There are currently no active polls. Join a poll to get started!"
+								description="There are currently no active polls you can vote on. Join a poll to get started!"
 							/>
 						) : (
-							activePolls.map((poll) => (
-								<PollCard
-									key={poll.id}
-									id={poll.id}
-									title={poll.title}
-									description={poll.description}
-									endDate={
-										poll.endTime
-											? new Date(poll.endTime)
-											: undefined
-									}
-									isActive={true}
-									hasVoted={false} // TODO: Replace with actual voting status
-								/>
-							))
+							activePolls.map((poll) => {
+								const voteStatus = getUserVoteStatus(poll.id);
+								const isTimeActive = isPollTimeActive(poll);
+
+								return (
+									<PollCard
+										key={poll.id}
+										id={poll.id}
+										title={poll.title}
+										description={poll.description}
+										endDate={
+											poll.endTime
+												? new Date(poll.endTime)
+												: undefined
+										}
+										isActive={isTimeActive}
+										hasVoted={voteStatus.data}
+									/>
+								);
+							})
 						)}
 					</div>
 				</div>
 
 				{/* Completed Polls */}
 				<div className="flex flex-col min-h-0">
-					<div className="flex items-center justify-between mb-4 flex-shrink-0">
+					<div className="mb-4 flex-shrink-0">
 						<h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
 							<div className="w-2 h-2 bg-gray-400 rounded-full"></div>
 							Completed Polls
 						</h2>
-						<Badge
-							variant="outline"
-							className="text-gray-700 border-gray-200"
-						>
-							{completedPolls.length} completed
-						</Badge>
 					</div>
 
 					<div className="flex-1 overflow-y-auto space-y-4 pr-2">
-						{isPending ? (
+						{isPending || isVoteStatusLoading ? (
 							<LoadingSkeleton />
 						) : error !== null &&
 						  !error.message.includes("No polls found") ? (
@@ -181,24 +209,29 @@ function RouteComponent() {
 						) : completedPolls.length === 0 ? (
 							<EmptyState
 								title="No Completed Polls"
-								description="Completed polls will appear here once they finish."
+								description="Completed polls and polls you've voted on will appear here."
 							/>
 						) : (
-							completedPolls.map((poll) => (
-								<PollCard
-									key={poll.id}
-									id={poll.id}
-									title={poll.title}
-									description={poll.description}
-									endDate={
-										poll.endTime
-											? new Date(poll.endTime)
-											: undefined
-									}
-									isActive={false}
-									hasVoted={false} // TODO: Replace with actual voting status
-								/>
-							))
+							completedPolls.map((poll) => {
+								const voteStatus = getUserVoteStatus(poll.id);
+								const isTimeActive = isPollTimeActive(poll);
+
+								return (
+									<PollCard
+										key={poll.id}
+										id={poll.id}
+										title={poll.title}
+										description={poll.description}
+										endDate={
+											poll.endTime
+												? new Date(poll.endTime)
+												: undefined
+										}
+										isActive={isTimeActive}
+										hasVoted={voteStatus.data}
+									/>
+								);
+							})
 						)}
 					</div>
 				</div>
@@ -206,3 +239,5 @@ function RouteComponent() {
 		</div>
 	);
 }
+
+export default RouteComponent;
