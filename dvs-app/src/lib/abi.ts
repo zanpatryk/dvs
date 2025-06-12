@@ -209,6 +209,19 @@ export const VotingSystemAbi = [
 	},
 	{
 		type: "function",
+		name: "grantUserRole",
+		inputs: [
+			{
+				name: "account",
+				type: "address",
+				internalType: "address",
+			},
+		],
+		outputs: [],
+		stateMutability: "nonpayable",
+	},
+	{
+		type: "function",
 		name: "hasRole",
 		inputs: [
 			{

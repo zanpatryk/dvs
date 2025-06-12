@@ -230,4 +230,12 @@ contract VotingSystem is AccessControlEnumerable {
 
         return Poll(pollAddress).hasVoted(_user);
     }
+
+    //=======================================================================
+    // Setters
+    //=======================================================================
+
+    function grantUserRole(address account) external {
+        _grantRole(USER_ROLE, account);
+    }
 }
