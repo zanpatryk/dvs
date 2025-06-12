@@ -113,7 +113,14 @@ export const pollDetailsQueryOptions = (pollId: string) =>
 		retry: false,
 	});
 
-async function createPoll(poll: CreatePollFormType) {
+async function createPoll(
+	poll: CreatePollFormType & {
+		id: string;
+		address: string;
+		accessCode: string;
+		startTime: string;
+	}
+) {
 	const res = await apiCall(() => client.api.polls.$post({ json: poll }));
 
 	if (!res.ok) {
@@ -129,7 +136,7 @@ export const useCreatePollMutation = () => {
 	const mutation = useMutation({
 		mutationFn: createPoll,
 		onError: (error: Error) => {
-			toast.error(error.message);
+			toast.error(`Create Poll Mutation Error: ${error.message}`);
 		},
 		onSuccess: (_, variables) => {
 			toast.success("Poll created successfully");
@@ -144,25 +151,25 @@ export const useCreatePollMutation = () => {
 	return mutation;
 };
 
-async function votePoll({ pollId, vote }: { pollId: string; vote: string }) {
-	console.log("Voting on poll:", pollId, "with vote:", vote);
-}
+// async function votePoll({ pollId, vote }: { pollId: string; vote: string }) {
+// 	console.log("Voting on poll:", pollId, "with vote:", vote);
+// }
 
-export const useVotePollMutation = () => {
-	const queryClient = useQueryClient();
-	const mutation = useMutation({
-		mutationFn: votePoll,
-		onError: (error: Error) => {
-			toast.error(error.message);
-		},
-		onSuccess: () => {
-			toast.success("Vote cast successfully");
-			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
-		},
-	});
+// export const useVotePollMutation = () => {
+// 	const queryClient = useQueryClient();
+// 	const mutation = useMutation({
+// 		mutationFn: votePoll,
+// 		onError: (error: Error) => {
+// 			toast.error(error.message);
+// 		},
+// 		onSuccess: () => {
+// 			toast.success("Vote cast successfully");
+// 			queryClient.invalidateQueries({ queryKey: ["get-polls"] });
+// 		},
+// 	});
 
-	return mutation;
-};
+// 	return mutation;
+// };
 
 async function joinPoll(code: string) {
 	const res = await apiCall(() =>
