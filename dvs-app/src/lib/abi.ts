@@ -36,6 +36,33 @@ export const VotingSystemAbi = [
 	},
 	{
 		type: "function",
+		name: "approve",
+		inputs: [
+			{ name: "to", type: "address", internalType: "address" },
+			{
+				name: "tokenId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+		],
+		outputs: [],
+		stateMutability: "nonpayable",
+	},
+	{
+		type: "function",
+		name: "balanceOf",
+		inputs: [
+			{
+				name: "owner",
+				type: "address",
+				internalType: "address",
+			},
+		],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
 		name: "castVote",
 		inputs: [
 			{
@@ -94,6 +121,11 @@ export const VotingSystemAbi = [
 				type: "uint256",
 				internalType: "uint256",
 			},
+			{
+				name: "includeManager",
+				type: "bool",
+				internalType: "bool",
+			},
 		],
 		outputs: [],
 		stateMutability: "nonpayable",
@@ -126,6 +158,19 @@ export const VotingSystemAbi = [
 	},
 	{
 		type: "function",
+		name: "getApproved",
+		inputs: [
+			{
+				name: "tokenId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+		],
+		outputs: [{ name: "", type: "address", internalType: "address" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
 		name: "getPollAddress",
 		inputs: [
 			{
@@ -148,6 +193,13 @@ export const VotingSystemAbi = [
 			},
 		],
 		outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
+		name: "getResultsTokenId",
+		inputs: [],
+		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
 		stateMutability: "view",
 	},
 	{
@@ -240,6 +292,24 @@ export const VotingSystemAbi = [
 	},
 	{
 		type: "function",
+		name: "hasUserClaimedResults",
+		inputs: [
+			{
+				name: "_pollId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+			{
+				name: "_user",
+				type: "address",
+				internalType: "address",
+			},
+		],
+		outputs: [{ name: "", type: "bool", internalType: "bool" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
 		name: "hasUserVoted",
 		inputs: [
 			{
@@ -271,7 +341,38 @@ export const VotingSystemAbi = [
 	},
 	{
 		type: "function",
+		name: "isApprovedForAll",
+		inputs: [
+			{
+				name: "owner",
+				type: "address",
+				internalType: "address",
+			},
+			{
+				name: "operator",
+				type: "address",
+				internalType: "address",
+			},
+		],
+		outputs: [{ name: "", type: "bool", internalType: "bool" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
 		name: "isManager",
+		inputs: [
+			{
+				name: "account",
+				type: "address",
+				internalType: "address",
+			},
+		],
+		outputs: [{ name: "", type: "bool", internalType: "bool" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
+		name: "isUser",
 		inputs: [
 			{
 				name: "account",
@@ -294,6 +395,26 @@ export const VotingSystemAbi = [
 		],
 		outputs: [],
 		stateMutability: "nonpayable",
+	},
+	{
+		type: "function",
+		name: "name",
+		inputs: [],
+		outputs: [{ name: "", type: "string", internalType: "string" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
+		name: "ownerOf",
+		inputs: [
+			{
+				name: "tokenId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+		],
+		outputs: [{ name: "", type: "address", internalType: "address" }],
+		stateMutability: "view",
 	},
 	{
 		type: "function",
@@ -346,6 +467,59 @@ export const VotingSystemAbi = [
 	},
 	{
 		type: "function",
+		name: "safeTransferFrom",
+		inputs: [
+			{
+				name: "from",
+				type: "address",
+				internalType: "address",
+			},
+			{ name: "to", type: "address", internalType: "address" },
+			{
+				name: "tokenId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+		],
+		outputs: [],
+		stateMutability: "nonpayable",
+	},
+	{
+		type: "function",
+		name: "safeTransferFrom",
+		inputs: [
+			{
+				name: "from",
+				type: "address",
+				internalType: "address",
+			},
+			{ name: "to", type: "address", internalType: "address" },
+			{
+				name: "tokenId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+			{ name: "data", type: "bytes", internalType: "bytes" },
+		],
+		outputs: [],
+		stateMutability: "nonpayable",
+	},
+	{
+		type: "function",
+		name: "setApprovalForAll",
+		inputs: [
+			{
+				name: "operator",
+				type: "address",
+				internalType: "address",
+			},
+			{ name: "approved", type: "bool", internalType: "bool" },
+		],
+		outputs: [],
+		stateMutability: "nonpayable",
+	},
+	{
+		type: "function",
 		name: "supportsInterface",
 		inputs: [
 			{
@@ -359,10 +533,49 @@ export const VotingSystemAbi = [
 	},
 	{
 		type: "function",
+		name: "symbol",
+		inputs: [],
+		outputs: [{ name: "", type: "string", internalType: "string" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
+		name: "tokenURI",
+		inputs: [
+			{
+				name: "tokenId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+		],
+		outputs: [{ name: "", type: "string", internalType: "string" }],
+		stateMutability: "view",
+	},
+	{
+		type: "function",
 		name: "totalPolls",
 		inputs: [],
 		outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
 		stateMutability: "view",
+	},
+	{
+		type: "function",
+		name: "transferFrom",
+		inputs: [
+			{
+				name: "from",
+				type: "address",
+				internalType: "address",
+			},
+			{ name: "to", type: "address", internalType: "address" },
+			{
+				name: "tokenId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+		],
+		outputs: [],
+		stateMutability: "nonpayable",
 	},
 	{
 		type: "event",
@@ -391,6 +604,75 @@ export const VotingSystemAbi = [
 	},
 	{
 		type: "event",
+		name: "Approval",
+		inputs: [
+			{
+				name: "owner",
+				type: "address",
+				indexed: true,
+				internalType: "address",
+			},
+			{
+				name: "approved",
+				type: "address",
+				indexed: true,
+				internalType: "address",
+			},
+			{
+				name: "tokenId",
+				type: "uint256",
+				indexed: true,
+				internalType: "uint256",
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: "event",
+		name: "ApprovalForAll",
+		inputs: [
+			{
+				name: "owner",
+				type: "address",
+				indexed: true,
+				internalType: "address",
+			},
+			{
+				name: "operator",
+				type: "address",
+				indexed: true,
+				internalType: "address",
+			},
+			{
+				name: "approved",
+				type: "bool",
+				indexed: false,
+				internalType: "bool",
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: "event",
+		name: "BatchMetadataUpdate",
+		inputs: [
+			{
+				name: "_fromTokenId",
+				type: "uint256",
+				indexed: false,
+				internalType: "uint256",
+			},
+			{
+				name: "_toTokenId",
+				type: "uint256",
+				indexed: false,
+				internalType: "uint256",
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: "event",
 		name: "JoinedPoll",
 		inputs: [
 			{
@@ -403,6 +685,19 @@ export const VotingSystemAbi = [
 				name: "pollId",
 				type: "uint256",
 				indexed: true,
+				internalType: "uint256",
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: "event",
+		name: "MetadataUpdate",
+		inputs: [
+			{
+				name: "_tokenId",
+				type: "uint256",
+				indexed: false,
 				internalType: "uint256",
 			},
 		],
@@ -534,6 +829,31 @@ export const VotingSystemAbi = [
 		anonymous: false,
 	},
 	{
+		type: "event",
+		name: "Transfer",
+		inputs: [
+			{
+				name: "from",
+				type: "address",
+				indexed: true,
+				internalType: "address",
+			},
+			{
+				name: "to",
+				type: "address",
+				indexed: true,
+				internalType: "address",
+			},
+			{
+				name: "tokenId",
+				type: "uint256",
+				indexed: true,
+				internalType: "uint256",
+			},
+		],
+		anonymous: false,
+	},
+	{
 		type: "error",
 		name: "AccessControlBadConfirmation",
 		inputs: [],
@@ -551,6 +871,109 @@ export const VotingSystemAbi = [
 				name: "neededRole",
 				type: "bytes32",
 				internalType: "bytes32",
+			},
+		],
+	},
+	{
+		type: "error",
+		name: "ERC721IncorrectOwner",
+		inputs: [
+			{
+				name: "sender",
+				type: "address",
+				internalType: "address",
+			},
+			{
+				name: "tokenId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+			{
+				name: "owner",
+				type: "address",
+				internalType: "address",
+			},
+		],
+	},
+	{
+		type: "error",
+		name: "ERC721InsufficientApproval",
+		inputs: [
+			{
+				name: "operator",
+				type: "address",
+				internalType: "address",
+			},
+			{
+				name: "tokenId",
+				type: "uint256",
+				internalType: "uint256",
+			},
+		],
+	},
+	{
+		type: "error",
+		name: "ERC721InvalidApprover",
+		inputs: [
+			{
+				name: "approver",
+				type: "address",
+				internalType: "address",
+			},
+		],
+	},
+	{
+		type: "error",
+		name: "ERC721InvalidOperator",
+		inputs: [
+			{
+				name: "operator",
+				type: "address",
+				internalType: "address",
+			},
+		],
+	},
+	{
+		type: "error",
+		name: "ERC721InvalidOwner",
+		inputs: [
+			{
+				name: "owner",
+				type: "address",
+				internalType: "address",
+			},
+		],
+	},
+	{
+		type: "error",
+		name: "ERC721InvalidReceiver",
+		inputs: [
+			{
+				name: "receiver",
+				type: "address",
+				internalType: "address",
+			},
+		],
+	},
+	{
+		type: "error",
+		name: "ERC721InvalidSender",
+		inputs: [
+			{
+				name: "sender",
+				type: "address",
+				internalType: "address",
+			},
+		],
+	},
+	{
+		type: "error",
+		name: "ERC721NonexistentToken",
+		inputs: [
+			{
+				name: "tokenId",
+				type: "uint256",
+				internalType: "uint256",
 			},
 		],
 	},
