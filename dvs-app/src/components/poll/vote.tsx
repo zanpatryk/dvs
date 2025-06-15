@@ -4,129 +4,202 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
 	DialogClose,
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { CircleCheckBig } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
-import { pollQueryOptions } from "@/lib/api";
+import { useCastVoteContractMutation } from "@/hooks/use-contract-query";
+import { pollDetailsQueryOptions } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { CircleIcon, Vote } from "lucide-react";
+
+function LoadingSkeleton() {
+	return (
+		<div className="space-y-6">
+			<div className="space-y-2">
+				<Skeleton className="h-8 w-3/4" />
+				<Skeleton className="h-4 w-full" />
+				<Skeleton className="h-4 w-2/3" />
+			</div>
+			<div className="space-y-3">
+				<Skeleton className="h-5 w-16" />
+				<div className="space-y-3">
+					{Array.from({ length: 3 }).map((_, i) => (
+						<div key={i} className="flex items-center gap-3">
+							<Skeleton className="h-4 w-4 rounded-full" />
+							<Skeleton className="h-4 w-32" />
+						</div>
+					))}
+				</div>
+			</div>
+			<Skeleton className="h-10 w-20" />
+		</div>
+	);
+}
+
+function ErrorState({ error }: { error: Error }) {
+	return (
+		<div className="flex flex-col items-center justify-center py-12 text-center">
+			<div className="text-red-600 mb-4">Error loading poll</div>
+			<p className="text-sm text-gray-600">{error.message}</p>
+		</div>
+	);
+}
 
 const FormSchema = z.object({
-	type: z.enum(["1", "2", "3"], {
-		required_error: "You need to select an option.",
-	}),
+	option: z.coerce.number(),
 });
 
 const VotePoll = ({ pollId }: { pollId: string }) => {
-	// const poll = PollsData.find((poll) => poll.id === pollId);
-	const { isPending, error, data } = useQuery(pollQueryOptions(pollId));
+	const {
+		isPending,
+		error,
+		data: poll,
+	} = useQuery(pollDetailsQueryOptions(pollId));
+
+	const castVoteMutation = useCastVoteContractMutation();
 
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
+		defaultValues: {
+			option: 0,
+		},
 	});
 
-	function onSubmit(data: z.infer<typeof FormSchema>) {
-		console.log(JSON.stringify(data, null, 2));
-	}
-
 	if (error) {
-		return <div>Poll not found</div>;
+		return <ErrorState error={error} />;
 	}
 
 	if (isPending) {
-		return <Skeleton className="h-4" />;
+		return <LoadingSkeleton />;
 	}
+
+	function onSubmit(data: z.infer<typeof FormSchema>) {
+		castVoteMutation.mutate({
+			pollId: BigInt(pollId),
+			optionIndex: BigInt(data.option),
+		});
+
+		if (castVoteMutation.isError) {
+			console.error(
+				"Failed to cast vote via contract:",
+				castVoteMutation.error
+			);
+			return;
+		}
+	}
+
+	const selectedValue = form.watch("option");
 
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 				<DialogHeader>
 					<DialogTitle className="text-2xl font-bold">
-						{data.poll.title}
+						{poll.title}
 					</DialogTitle>
-					<DialogDescription>
-						{data.poll.description}
-					</DialogDescription>
+					<DialogDescription>{poll.description}</DialogDescription>
 				</DialogHeader>
+
 				<FormField
 					control={form.control}
-					name="type"
+					name="option"
 					render={({ field }) => (
 						<FormItem className="space-y-3">
-							<FormLabel>Options</FormLabel>
-							<FormDescription>Choose an option</FormDescription>
+							<FormLabel className="text-base font-medium">
+								Options
+							</FormLabel>
 							<FormControl>
 								<RadioGroup
-									onValueChange={field.onChange}
-									defaultValue={field.value}
-									className="flex flex-col space-y-1"
+									onValueChange={(value) =>
+										field.onChange(Number(value))
+									}
+									value={field.value.toString()}
+									className="space-y-2"
 								>
-									<FormItem className="flex items-center space-x-3 space-y-0">
-										<FormControl>
-											<RadioGroupItem value="1" />
-										</FormControl>
-										<FormLabel className="font-normal">
-											Option #1
-										</FormLabel>
-									</FormItem>
-									<FormItem className="flex items-center space-x-3 space-y-0">
-										<FormControl>
-											<RadioGroupItem value="2" />
-										</FormControl>
-										<FormLabel className="font-normal">
-											Option #2
-										</FormLabel>
-									</FormItem>
-									<FormItem className="flex items-center space-x-3 space-y-0">
-										<FormControl>
-											<RadioGroupItem value="3" />
-										</FormControl>
-										<FormLabel className="font-normal">
-											Option #3
-										</FormLabel>
-									</FormItem>
+									{poll.options.map((option) => {
+										const isSelected =
+											selectedValue === option.id;
+										return (
+											<Label
+												key={option.id}
+												htmlFor={option.id.toString()}
+												className={cn(
+													"flex items-center rounded-md border px-4 py-3 transition-colors cursor-pointer",
+													isSelected
+														? "border-blue-200 bg-blue-50"
+														: "border-gray-200 bg-gray-50 hover:bg-gray-100"
+												)}
+											>
+												<RadioGroupItem
+													value={option.id.toString()}
+													id={option.id.toString()}
+													className={cn(
+														isSelected &&
+															"text-blue-600 border-blue-600"
+													)}
+													dot={
+														<CircleIcon
+															className={cn(
+																"absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2",
+																isSelected
+																	? "fill-blue-600"
+																	: "fill-gray-400"
+															)}
+														/>
+													}
+												/>
+												<span
+													className={cn(
+														"ml-3 font-medium",
+														isSelected
+															? "text-blue-600"
+															: "text-gray-700"
+													)}
+												>
+													{option.value}
+												</span>
+											</Label>
+										);
+									})}
 								</RadioGroup>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
 					)}
 				/>
-				{form.formState.isValid ? (
-					<div>
-						<DialogClose asChild>
-							<Button
-								type="submit"
-								className="bg-green-500 hover:bg-green-600"
-							>
-								<CircleCheckBig />
-								Vote
-							</Button>
-						</DialogClose>
-					</div>
-				) : (
-					<Button
-						className="bg-green-500 hover:bg-green-600"
-						disabled
-					>
-						<CircleCheckBig />
-						Vote
-					</Button>
-				)}
+
+				<div>
+					<DialogClose asChild>
+						<Button
+							type="submit"
+							className="bg-green-500 hover:bg-green-600"
+							disabled={
+								castVoteMutation.isPending ||
+								!form.formState.isValid
+							}
+						>
+							<Vote className="mr-2 h-4 w-4" />
+							{castVoteMutation.isPending ? "Voting..." : "Vote"}
+						</Button>
+					</DialogClose>
+				</div>
 			</form>
 		</Form>
 	);
 };
+
 export default VotePoll;

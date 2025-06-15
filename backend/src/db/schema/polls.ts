@@ -1,5 +1,6 @@
-import { relations, type InferSelectModel } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
+	boolean,
 	index,
 	integer,
 	numeric,
@@ -19,9 +20,10 @@ export const pollsTable = pgTable(
 		title: text("title").notNull(),
 		description: text("desctiption").notNull(),
 		participantLimit: integer("participant_limit").notNull(),
-		accessCode: varchar("access_code", { length: 6 }).notNull(),
+		accessCode: varchar("access_code", { length: 66 }).notNull(),
 		startTime: timestamp("start_time").notNull(),
-		endTime: timestamp("end_time"),
+		endTime: timestamp("end_time").notNull(),
+		hasEndedPrematurely: boolean("has_ended_prematurely").default(false),
 	},
 	(t) => [index("creator_idx").on(t.creatorAddress)]
 );
@@ -92,3 +94,5 @@ export const pollsParticipantsInsertSchema = createInsertSchema(
 );
 
 export const pollsOptionsInsertSchema = createInsertSchema(pollsOptionsTable);
+
+export type Poll = typeof pollsTable.$inferSelect;

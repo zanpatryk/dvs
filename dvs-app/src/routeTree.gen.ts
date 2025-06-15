@@ -8,27 +8,41 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as IndexImport } from './routes/_index'
-import { Route as AuthenticatedImport } from './routes/_authenticated'
+import { Route as IndexRouteImport } from './routes/_index/route'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated/route'
 import { Route as IndexIndexImport } from './routes/_index/index'
 import { Route as IndexContactImport } from './routes/_index/contact'
 import { Route as IndexAboutImport } from './routes/_index/about'
-import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/_dashboard'
-import { Route as AuthenticatedDashboardDashboardTicketsImport } from './routes/_authenticated/_dashboard/dashboard/tickets'
-import { Route as AuthenticatedDashboardDashboardPollsImport } from './routes/_authenticated/_dashboard/dashboard/polls'
-import { Route as AuthenticatedDashboardDashboardManagePollsImport } from './routes/_authenticated/_dashboard/dashboard/manage-polls'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/_dashboard/route'
+import { Route as AuthenticatedDashboardDashboardIndexImport } from './routes/_authenticated/_dashboard/dashboard/index'
+import { Route as AuthenticatedDashboardDashboardNotForAdminRouteImport } from './routes/_authenticated/_dashboard/dashboard/_not-for-admin/route'
+import { Route as AuthenticatedDashboardDashboardManagerOnlyRouteImport } from './routes/_authenticated/_dashboard/dashboard/_manager-only/route'
+import { Route as AuthenticatedDashboardDashboardAdminOnlyRouteImport } from './routes/_authenticated/_dashboard/dashboard/_admin-only/route'
+import { Route as AuthenticatedDashboardDashboardNotForAdminTicketsImport } from './routes/_authenticated/_dashboard/dashboard/_not-for-admin/tickets'
+import { Route as AuthenticatedDashboardDashboardNotForAdminPollsImport } from './routes/_authenticated/_dashboard/dashboard/_not-for-admin/polls'
+import { Route as AuthenticatedDashboardDashboardManagerOnlyManagePollsImport } from './routes/_authenticated/_dashboard/dashboard/_manager-only/manage-polls'
+import { Route as AuthenticatedDashboardDashboardAdminOnlyManageUsersImport } from './routes/_authenticated/_dashboard/dashboard/_admin-only/manage-users'
+import { Route as AuthenticatedDashboardDashboardAdminOnlyManageTicketsImport } from './routes/_authenticated/_dashboard/dashboard/_admin-only/manage-tickets'
+
+// Create Virtual Routes
+
+const AuthenticatedDashboardDashboardImport = createFileRoute(
+  '/_authenticated/_dashboard/dashboard',
+)()
 
 // Create/Update Routes
 
-const IndexRoute = IndexImport.update({
+const IndexRouteRoute = IndexRouteImport.update({
   id: '/_index',
   getParentRoute: () => rootRoute,
 } as any)
 
-const AuthenticatedRoute = AuthenticatedImport.update({
+const AuthenticatedRouteRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRoute,
 } as any)
@@ -36,45 +50,92 @@ const AuthenticatedRoute = AuthenticatedImport.update({
 const IndexIndexRoute = IndexIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => IndexRoute,
+  getParentRoute: () => IndexRouteRoute,
 } as any)
 
 const IndexContactRoute = IndexContactImport.update({
   id: '/contact',
   path: '/contact',
-  getParentRoute: () => IndexRoute,
+  getParentRoute: () => IndexRouteRoute,
 } as any)
 
 const IndexAboutRoute = IndexAboutImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => IndexRoute,
+  getParentRoute: () => IndexRouteRoute,
 } as any)
 
-const AuthenticatedDashboardRoute = AuthenticatedDashboardImport.update({
-  id: '/_dashboard',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-
-const AuthenticatedDashboardDashboardTicketsRoute =
-  AuthenticatedDashboardDashboardTicketsImport.update({
-    id: '/dashboard/tickets',
-    path: '/dashboard/tickets',
-    getParentRoute: () => AuthenticatedDashboardRoute,
+const AuthenticatedDashboardRouteRoute =
+  AuthenticatedDashboardRouteImport.update({
+    id: '/_dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
-const AuthenticatedDashboardDashboardPollsRoute =
-  AuthenticatedDashboardDashboardPollsImport.update({
-    id: '/dashboard/polls',
-    path: '/dashboard/polls',
-    getParentRoute: () => AuthenticatedDashboardRoute,
+const AuthenticatedDashboardDashboardRoute =
+  AuthenticatedDashboardDashboardImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedDashboardRouteRoute,
   } as any)
 
-const AuthenticatedDashboardDashboardManagePollsRoute =
-  AuthenticatedDashboardDashboardManagePollsImport.update({
-    id: '/dashboard/manage-polls',
-    path: '/dashboard/manage-polls',
-    getParentRoute: () => AuthenticatedDashboardRoute,
+const AuthenticatedDashboardDashboardIndexRoute =
+  AuthenticatedDashboardDashboardIndexImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardDashboardRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardNotForAdminRouteRoute =
+  AuthenticatedDashboardDashboardNotForAdminRouteImport.update({
+    id: '/_not-for-admin',
+    getParentRoute: () => AuthenticatedDashboardDashboardRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardManagerOnlyRouteRoute =
+  AuthenticatedDashboardDashboardManagerOnlyRouteImport.update({
+    id: '/_manager-only',
+    getParentRoute: () => AuthenticatedDashboardDashboardRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardAdminOnlyRouteRoute =
+  AuthenticatedDashboardDashboardAdminOnlyRouteImport.update({
+    id: '/_admin-only',
+    getParentRoute: () => AuthenticatedDashboardDashboardRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardNotForAdminTicketsRoute =
+  AuthenticatedDashboardDashboardNotForAdminTicketsImport.update({
+    id: '/tickets',
+    path: '/tickets',
+    getParentRoute: () => AuthenticatedDashboardDashboardNotForAdminRouteRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardNotForAdminPollsRoute =
+  AuthenticatedDashboardDashboardNotForAdminPollsImport.update({
+    id: '/polls',
+    path: '/polls',
+    getParentRoute: () => AuthenticatedDashboardDashboardNotForAdminRouteRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardManagerOnlyManagePollsRoute =
+  AuthenticatedDashboardDashboardManagerOnlyManagePollsImport.update({
+    id: '/manage-polls',
+    path: '/manage-polls',
+    getParentRoute: () => AuthenticatedDashboardDashboardManagerOnlyRouteRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardAdminOnlyManageUsersRoute =
+  AuthenticatedDashboardDashboardAdminOnlyManageUsersImport.update({
+    id: '/manage-users',
+    path: '/manage-users',
+    getParentRoute: () => AuthenticatedDashboardDashboardAdminOnlyRouteRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardAdminOnlyManageTicketsRoute =
+  AuthenticatedDashboardDashboardAdminOnlyManageTicketsImport.update({
+    id: '/manage-tickets',
+    path: '/manage-tickets',
+    getParentRoute: () => AuthenticatedDashboardDashboardAdminOnlyRouteRoute,
   } as any)
 
 // Populate the FileRoutesByPath interface
@@ -85,148 +146,282 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof AuthenticatedImport
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRoute
     }
     '/_index': {
       id: '/_index'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof IndexImport
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRoute
     }
     '/_authenticated/_dashboard': {
       id: '/_authenticated/_dashboard'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof AuthenticatedDashboardImport
-      parentRoute: typeof AuthenticatedImport
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteImport
     }
     '/_index/about': {
       id: '/_index/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof IndexAboutImport
-      parentRoute: typeof IndexImport
+      parentRoute: typeof IndexRouteImport
     }
     '/_index/contact': {
       id: '/_index/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof IndexContactImport
-      parentRoute: typeof IndexImport
+      parentRoute: typeof IndexRouteImport
     }
     '/_index/': {
       id: '/_index/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexIndexImport
-      parentRoute: typeof IndexImport
+      parentRoute: typeof IndexRouteImport
     }
-    '/_authenticated/_dashboard/dashboard/manage-polls': {
-      id: '/_authenticated/_dashboard/dashboard/manage-polls'
-      path: '/dashboard/manage-polls'
+    '/_authenticated/_dashboard/dashboard': {
+      id: '/_authenticated/_dashboard/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardImport
+      parentRoute: typeof AuthenticatedDashboardRouteImport
+    }
+    '/_authenticated/_dashboard/dashboard/_admin-only': {
+      id: '/_authenticated/_dashboard/dashboard/_admin-only'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardAdminOnlyRouteImport
+      parentRoute: typeof AuthenticatedDashboardDashboardRoute
+    }
+    '/_authenticated/_dashboard/dashboard/_manager-only': {
+      id: '/_authenticated/_dashboard/dashboard/_manager-only'
+      path: ''
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardManagerOnlyRouteImport
+      parentRoute: typeof AuthenticatedDashboardDashboardImport
+    }
+    '/_authenticated/_dashboard/dashboard/_not-for-admin': {
+      id: '/_authenticated/_dashboard/dashboard/_not-for-admin'
+      path: ''
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardNotForAdminRouteImport
+      parentRoute: typeof AuthenticatedDashboardDashboardImport
+    }
+    '/_authenticated/_dashboard/dashboard/': {
+      id: '/_authenticated/_dashboard/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardIndexImport
+      parentRoute: typeof AuthenticatedDashboardDashboardImport
+    }
+    '/_authenticated/_dashboard/dashboard/_admin-only/manage-tickets': {
+      id: '/_authenticated/_dashboard/dashboard/_admin-only/manage-tickets'
+      path: '/manage-tickets'
+      fullPath: '/dashboard/manage-tickets'
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardAdminOnlyManageTicketsImport
+      parentRoute: typeof AuthenticatedDashboardDashboardAdminOnlyRouteImport
+    }
+    '/_authenticated/_dashboard/dashboard/_admin-only/manage-users': {
+      id: '/_authenticated/_dashboard/dashboard/_admin-only/manage-users'
+      path: '/manage-users'
+      fullPath: '/dashboard/manage-users'
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardAdminOnlyManageUsersImport
+      parentRoute: typeof AuthenticatedDashboardDashboardAdminOnlyRouteImport
+    }
+    '/_authenticated/_dashboard/dashboard/_manager-only/manage-polls': {
+      id: '/_authenticated/_dashboard/dashboard/_manager-only/manage-polls'
+      path: '/manage-polls'
       fullPath: '/dashboard/manage-polls'
-      preLoaderRoute: typeof AuthenticatedDashboardDashboardManagePollsImport
-      parentRoute: typeof AuthenticatedDashboardImport
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardManagerOnlyManagePollsImport
+      parentRoute: typeof AuthenticatedDashboardDashboardManagerOnlyRouteImport
     }
-    '/_authenticated/_dashboard/dashboard/polls': {
-      id: '/_authenticated/_dashboard/dashboard/polls'
-      path: '/dashboard/polls'
+    '/_authenticated/_dashboard/dashboard/_not-for-admin/polls': {
+      id: '/_authenticated/_dashboard/dashboard/_not-for-admin/polls'
+      path: '/polls'
       fullPath: '/dashboard/polls'
-      preLoaderRoute: typeof AuthenticatedDashboardDashboardPollsImport
-      parentRoute: typeof AuthenticatedDashboardImport
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardNotForAdminPollsImport
+      parentRoute: typeof AuthenticatedDashboardDashboardNotForAdminRouteImport
     }
-    '/_authenticated/_dashboard/dashboard/tickets': {
-      id: '/_authenticated/_dashboard/dashboard/tickets'
-      path: '/dashboard/tickets'
+    '/_authenticated/_dashboard/dashboard/_not-for-admin/tickets': {
+      id: '/_authenticated/_dashboard/dashboard/_not-for-admin/tickets'
+      path: '/tickets'
       fullPath: '/dashboard/tickets'
-      preLoaderRoute: typeof AuthenticatedDashboardDashboardTicketsImport
-      parentRoute: typeof AuthenticatedDashboardImport
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardNotForAdminTicketsImport
+      parentRoute: typeof AuthenticatedDashboardDashboardNotForAdminRouteImport
     }
   }
 }
 
 // Create and export the route tree
 
-interface AuthenticatedDashboardRouteChildren {
-  AuthenticatedDashboardDashboardManagePollsRoute: typeof AuthenticatedDashboardDashboardManagePollsRoute
-  AuthenticatedDashboardDashboardPollsRoute: typeof AuthenticatedDashboardDashboardPollsRoute
-  AuthenticatedDashboardDashboardTicketsRoute: typeof AuthenticatedDashboardDashboardTicketsRoute
+interface AuthenticatedDashboardDashboardAdminOnlyRouteRouteChildren {
+  AuthenticatedDashboardDashboardAdminOnlyManageTicketsRoute: typeof AuthenticatedDashboardDashboardAdminOnlyManageTicketsRoute
+  AuthenticatedDashboardDashboardAdminOnlyManageUsersRoute: typeof AuthenticatedDashboardDashboardAdminOnlyManageUsersRoute
 }
 
-const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
+const AuthenticatedDashboardDashboardAdminOnlyRouteRouteChildren: AuthenticatedDashboardDashboardAdminOnlyRouteRouteChildren =
   {
-    AuthenticatedDashboardDashboardManagePollsRoute:
-      AuthenticatedDashboardDashboardManagePollsRoute,
-    AuthenticatedDashboardDashboardPollsRoute:
-      AuthenticatedDashboardDashboardPollsRoute,
-    AuthenticatedDashboardDashboardTicketsRoute:
-      AuthenticatedDashboardDashboardTicketsRoute,
+    AuthenticatedDashboardDashboardAdminOnlyManageTicketsRoute:
+      AuthenticatedDashboardDashboardAdminOnlyManageTicketsRoute,
+    AuthenticatedDashboardDashboardAdminOnlyManageUsersRoute:
+      AuthenticatedDashboardDashboardAdminOnlyManageUsersRoute,
   }
 
-const AuthenticatedDashboardRouteWithChildren =
-  AuthenticatedDashboardRoute._addFileChildren(
-    AuthenticatedDashboardRouteChildren,
+const AuthenticatedDashboardDashboardAdminOnlyRouteRouteWithChildren =
+  AuthenticatedDashboardDashboardAdminOnlyRouteRoute._addFileChildren(
+    AuthenticatedDashboardDashboardAdminOnlyRouteRouteChildren,
   )
 
-interface AuthenticatedRouteChildren {
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
+interface AuthenticatedDashboardDashboardManagerOnlyRouteRouteChildren {
+  AuthenticatedDashboardDashboardManagerOnlyManagePollsRoute: typeof AuthenticatedDashboardDashboardManagerOnlyManagePollsRoute
 }
 
-const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
+const AuthenticatedDashboardDashboardManagerOnlyRouteRouteChildren: AuthenticatedDashboardDashboardManagerOnlyRouteRouteChildren =
+  {
+    AuthenticatedDashboardDashboardManagerOnlyManagePollsRoute:
+      AuthenticatedDashboardDashboardManagerOnlyManagePollsRoute,
+  }
+
+const AuthenticatedDashboardDashboardManagerOnlyRouteRouteWithChildren =
+  AuthenticatedDashboardDashboardManagerOnlyRouteRoute._addFileChildren(
+    AuthenticatedDashboardDashboardManagerOnlyRouteRouteChildren,
+  )
+
+interface AuthenticatedDashboardDashboardNotForAdminRouteRouteChildren {
+  AuthenticatedDashboardDashboardNotForAdminPollsRoute: typeof AuthenticatedDashboardDashboardNotForAdminPollsRoute
+  AuthenticatedDashboardDashboardNotForAdminTicketsRoute: typeof AuthenticatedDashboardDashboardNotForAdminTicketsRoute
 }
 
-const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
-)
+const AuthenticatedDashboardDashboardNotForAdminRouteRouteChildren: AuthenticatedDashboardDashboardNotForAdminRouteRouteChildren =
+  {
+    AuthenticatedDashboardDashboardNotForAdminPollsRoute:
+      AuthenticatedDashboardDashboardNotForAdminPollsRoute,
+    AuthenticatedDashboardDashboardNotForAdminTicketsRoute:
+      AuthenticatedDashboardDashboardNotForAdminTicketsRoute,
+  }
 
-interface IndexRouteChildren {
+const AuthenticatedDashboardDashboardNotForAdminRouteRouteWithChildren =
+  AuthenticatedDashboardDashboardNotForAdminRouteRoute._addFileChildren(
+    AuthenticatedDashboardDashboardNotForAdminRouteRouteChildren,
+  )
+
+interface AuthenticatedDashboardDashboardRouteChildren {
+  AuthenticatedDashboardDashboardAdminOnlyRouteRoute: typeof AuthenticatedDashboardDashboardAdminOnlyRouteRouteWithChildren
+  AuthenticatedDashboardDashboardManagerOnlyRouteRoute: typeof AuthenticatedDashboardDashboardManagerOnlyRouteRouteWithChildren
+  AuthenticatedDashboardDashboardNotForAdminRouteRoute: typeof AuthenticatedDashboardDashboardNotForAdminRouteRouteWithChildren
+  AuthenticatedDashboardDashboardIndexRoute: typeof AuthenticatedDashboardDashboardIndexRoute
+}
+
+const AuthenticatedDashboardDashboardRouteChildren: AuthenticatedDashboardDashboardRouteChildren =
+  {
+    AuthenticatedDashboardDashboardAdminOnlyRouteRoute:
+      AuthenticatedDashboardDashboardAdminOnlyRouteRouteWithChildren,
+    AuthenticatedDashboardDashboardManagerOnlyRouteRoute:
+      AuthenticatedDashboardDashboardManagerOnlyRouteRouteWithChildren,
+    AuthenticatedDashboardDashboardNotForAdminRouteRoute:
+      AuthenticatedDashboardDashboardNotForAdminRouteRouteWithChildren,
+    AuthenticatedDashboardDashboardIndexRoute:
+      AuthenticatedDashboardDashboardIndexRoute,
+  }
+
+const AuthenticatedDashboardDashboardRouteWithChildren =
+  AuthenticatedDashboardDashboardRoute._addFileChildren(
+    AuthenticatedDashboardDashboardRouteChildren,
+  )
+
+interface AuthenticatedDashboardRouteRouteChildren {
+  AuthenticatedDashboardDashboardRoute: typeof AuthenticatedDashboardDashboardRouteWithChildren
+}
+
+const AuthenticatedDashboardRouteRouteChildren: AuthenticatedDashboardRouteRouteChildren =
+  {
+    AuthenticatedDashboardDashboardRoute:
+      AuthenticatedDashboardDashboardRouteWithChildren,
+  }
+
+const AuthenticatedDashboardRouteRouteWithChildren =
+  AuthenticatedDashboardRouteRoute._addFileChildren(
+    AuthenticatedDashboardRouteRouteChildren,
+  )
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRouteRoute: typeof AuthenticatedDashboardRouteRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRouteRoute:
+    AuthenticatedDashboardRouteRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+interface IndexRouteRouteChildren {
   IndexAboutRoute: typeof IndexAboutRoute
   IndexContactRoute: typeof IndexContactRoute
   IndexIndexRoute: typeof IndexIndexRoute
 }
 
-const IndexRouteChildren: IndexRouteChildren = {
+const IndexRouteRouteChildren: IndexRouteRouteChildren = {
   IndexAboutRoute: IndexAboutRoute,
   IndexContactRoute: IndexContactRoute,
   IndexIndexRoute: IndexIndexRoute,
 }
 
-const IndexRouteWithChildren = IndexRoute._addFileChildren(IndexRouteChildren)
+const IndexRouteRouteWithChildren = IndexRouteRoute._addFileChildren(
+  IndexRouteRouteChildren,
+)
 
 export interface FileRoutesByFullPath {
-  '': typeof AuthenticatedDashboardRouteWithChildren
+  '': typeof AuthenticatedDashboardRouteRouteWithChildren
   '/about': typeof IndexAboutRoute
   '/contact': typeof IndexContactRoute
   '/': typeof IndexIndexRoute
-  '/dashboard/manage-polls': typeof AuthenticatedDashboardDashboardManagePollsRoute
-  '/dashboard/polls': typeof AuthenticatedDashboardDashboardPollsRoute
-  '/dashboard/tickets': typeof AuthenticatedDashboardDashboardTicketsRoute
+  '/dashboard': typeof AuthenticatedDashboardDashboardNotForAdminRouteRouteWithChildren
+  '/dashboard/': typeof AuthenticatedDashboardDashboardIndexRoute
+  '/dashboard/manage-tickets': typeof AuthenticatedDashboardDashboardAdminOnlyManageTicketsRoute
+  '/dashboard/manage-users': typeof AuthenticatedDashboardDashboardAdminOnlyManageUsersRoute
+  '/dashboard/manage-polls': typeof AuthenticatedDashboardDashboardManagerOnlyManagePollsRoute
+  '/dashboard/polls': typeof AuthenticatedDashboardDashboardNotForAdminPollsRoute
+  '/dashboard/tickets': typeof AuthenticatedDashboardDashboardNotForAdminTicketsRoute
 }
 
 export interface FileRoutesByTo {
-  '': typeof AuthenticatedDashboardRouteWithChildren
+  '': typeof AuthenticatedDashboardRouteRouteWithChildren
   '/about': typeof IndexAboutRoute
   '/contact': typeof IndexContactRoute
   '/': typeof IndexIndexRoute
-  '/dashboard/manage-polls': typeof AuthenticatedDashboardDashboardManagePollsRoute
-  '/dashboard/polls': typeof AuthenticatedDashboardDashboardPollsRoute
-  '/dashboard/tickets': typeof AuthenticatedDashboardDashboardTicketsRoute
+  '/dashboard': typeof AuthenticatedDashboardDashboardIndexRoute
+  '/dashboard/manage-tickets': typeof AuthenticatedDashboardDashboardAdminOnlyManageTicketsRoute
+  '/dashboard/manage-users': typeof AuthenticatedDashboardDashboardAdminOnlyManageUsersRoute
+  '/dashboard/manage-polls': typeof AuthenticatedDashboardDashboardManagerOnlyManagePollsRoute
+  '/dashboard/polls': typeof AuthenticatedDashboardDashboardNotForAdminPollsRoute
+  '/dashboard/tickets': typeof AuthenticatedDashboardDashboardNotForAdminTicketsRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/_index': typeof IndexRouteWithChildren
-  '/_authenticated/_dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_index': typeof IndexRouteRouteWithChildren
+  '/_authenticated/_dashboard': typeof AuthenticatedDashboardRouteRouteWithChildren
   '/_index/about': typeof IndexAboutRoute
   '/_index/contact': typeof IndexContactRoute
   '/_index/': typeof IndexIndexRoute
-  '/_authenticated/_dashboard/dashboard/manage-polls': typeof AuthenticatedDashboardDashboardManagePollsRoute
-  '/_authenticated/_dashboard/dashboard/polls': typeof AuthenticatedDashboardDashboardPollsRoute
-  '/_authenticated/_dashboard/dashboard/tickets': typeof AuthenticatedDashboardDashboardTicketsRoute
+  '/_authenticated/_dashboard/dashboard': typeof AuthenticatedDashboardDashboardRouteWithChildren
+  '/_authenticated/_dashboard/dashboard/_admin-only': typeof AuthenticatedDashboardDashboardAdminOnlyRouteRouteWithChildren
+  '/_authenticated/_dashboard/dashboard/_manager-only': typeof AuthenticatedDashboardDashboardManagerOnlyRouteRouteWithChildren
+  '/_authenticated/_dashboard/dashboard/_not-for-admin': typeof AuthenticatedDashboardDashboardNotForAdminRouteRouteWithChildren
+  '/_authenticated/_dashboard/dashboard/': typeof AuthenticatedDashboardDashboardIndexRoute
+  '/_authenticated/_dashboard/dashboard/_admin-only/manage-tickets': typeof AuthenticatedDashboardDashboardAdminOnlyManageTicketsRoute
+  '/_authenticated/_dashboard/dashboard/_admin-only/manage-users': typeof AuthenticatedDashboardDashboardAdminOnlyManageUsersRoute
+  '/_authenticated/_dashboard/dashboard/_manager-only/manage-polls': typeof AuthenticatedDashboardDashboardManagerOnlyManagePollsRoute
+  '/_authenticated/_dashboard/dashboard/_not-for-admin/polls': typeof AuthenticatedDashboardDashboardNotForAdminPollsRoute
+  '/_authenticated/_dashboard/dashboard/_not-for-admin/tickets': typeof AuthenticatedDashboardDashboardNotForAdminTicketsRoute
 }
 
 export interface FileRouteTypes {
@@ -236,6 +431,10 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/'
+    | '/dashboard'
+    | '/dashboard/'
+    | '/dashboard/manage-tickets'
+    | '/dashboard/manage-users'
     | '/dashboard/manage-polls'
     | '/dashboard/polls'
     | '/dashboard/tickets'
@@ -245,6 +444,9 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/'
+    | '/dashboard'
+    | '/dashboard/manage-tickets'
+    | '/dashboard/manage-users'
     | '/dashboard/manage-polls'
     | '/dashboard/polls'
     | '/dashboard/tickets'
@@ -256,20 +458,27 @@ export interface FileRouteTypes {
     | '/_index/about'
     | '/_index/contact'
     | '/_index/'
-    | '/_authenticated/_dashboard/dashboard/manage-polls'
-    | '/_authenticated/_dashboard/dashboard/polls'
-    | '/_authenticated/_dashboard/dashboard/tickets'
+    | '/_authenticated/_dashboard/dashboard'
+    | '/_authenticated/_dashboard/dashboard/_admin-only'
+    | '/_authenticated/_dashboard/dashboard/_manager-only'
+    | '/_authenticated/_dashboard/dashboard/_not-for-admin'
+    | '/_authenticated/_dashboard/dashboard/'
+    | '/_authenticated/_dashboard/dashboard/_admin-only/manage-tickets'
+    | '/_authenticated/_dashboard/dashboard/_admin-only/manage-users'
+    | '/_authenticated/_dashboard/dashboard/_manager-only/manage-polls'
+    | '/_authenticated/_dashboard/dashboard/_not-for-admin/polls'
+    | '/_authenticated/_dashboard/dashboard/_not-for-admin/tickets'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  IndexRoute: typeof IndexRouteWithChildren
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  IndexRouteRoute: typeof IndexRouteRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  IndexRoute: IndexRouteWithChildren,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  IndexRouteRoute: IndexRouteRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -287,13 +496,13 @@ export const routeTree = rootRoute
       ]
     },
     "/_authenticated": {
-      "filePath": "_authenticated.tsx",
+      "filePath": "_authenticated/route.tsx",
       "children": [
         "/_authenticated/_dashboard"
       ]
     },
     "/_index": {
-      "filePath": "_index.tsx",
+      "filePath": "_index/route.tsx",
       "children": [
         "/_index/about",
         "/_index/contact",
@@ -301,12 +510,10 @@ export const routeTree = rootRoute
       ]
     },
     "/_authenticated/_dashboard": {
-      "filePath": "_authenticated/_dashboard.tsx",
+      "filePath": "_authenticated/_dashboard/route.tsx",
       "parent": "/_authenticated",
       "children": [
-        "/_authenticated/_dashboard/dashboard/manage-polls",
-        "/_authenticated/_dashboard/dashboard/polls",
-        "/_authenticated/_dashboard/dashboard/tickets"
+        "/_authenticated/_dashboard/dashboard"
       ]
     },
     "/_index/about": {
@@ -321,17 +528,62 @@ export const routeTree = rootRoute
       "filePath": "_index/index.tsx",
       "parent": "/_index"
     },
-    "/_authenticated/_dashboard/dashboard/manage-polls": {
-      "filePath": "_authenticated/_dashboard/dashboard/manage-polls.tsx",
-      "parent": "/_authenticated/_dashboard"
+    "/_authenticated/_dashboard/dashboard": {
+      "filePath": "_authenticated/_dashboard/dashboard/_admin-only",
+      "parent": "/_authenticated/_dashboard",
+      "children": [
+        "/_authenticated/_dashboard/dashboard/_admin-only",
+        "/_authenticated/_dashboard/dashboard/_manager-only",
+        "/_authenticated/_dashboard/dashboard/_not-for-admin",
+        "/_authenticated/_dashboard/dashboard/"
+      ]
     },
-    "/_authenticated/_dashboard/dashboard/polls": {
-      "filePath": "_authenticated/_dashboard/dashboard/polls.tsx",
-      "parent": "/_authenticated/_dashboard"
+    "/_authenticated/_dashboard/dashboard/_admin-only": {
+      "filePath": "_authenticated/_dashboard/dashboard/_admin-only/route.tsx",
+      "parent": "/_authenticated/_dashboard/dashboard",
+      "children": [
+        "/_authenticated/_dashboard/dashboard/_admin-only/manage-tickets",
+        "/_authenticated/_dashboard/dashboard/_admin-only/manage-users"
+      ]
     },
-    "/_authenticated/_dashboard/dashboard/tickets": {
-      "filePath": "_authenticated/_dashboard/dashboard/tickets.tsx",
-      "parent": "/_authenticated/_dashboard"
+    "/_authenticated/_dashboard/dashboard/_manager-only": {
+      "filePath": "_authenticated/_dashboard/dashboard/_manager-only/route.tsx",
+      "parent": "/_authenticated/_dashboard/dashboard",
+      "children": [
+        "/_authenticated/_dashboard/dashboard/_manager-only/manage-polls"
+      ]
+    },
+    "/_authenticated/_dashboard/dashboard/_not-for-admin": {
+      "filePath": "_authenticated/_dashboard/dashboard/_not-for-admin/route.tsx",
+      "parent": "/_authenticated/_dashboard/dashboard",
+      "children": [
+        "/_authenticated/_dashboard/dashboard/_not-for-admin/polls",
+        "/_authenticated/_dashboard/dashboard/_not-for-admin/tickets"
+      ]
+    },
+    "/_authenticated/_dashboard/dashboard/": {
+      "filePath": "_authenticated/_dashboard/dashboard/index.tsx",
+      "parent": "/_authenticated/_dashboard/dashboard"
+    },
+    "/_authenticated/_dashboard/dashboard/_admin-only/manage-tickets": {
+      "filePath": "_authenticated/_dashboard/dashboard/_admin-only/manage-tickets.tsx",
+      "parent": "/_authenticated/_dashboard/dashboard/_admin-only"
+    },
+    "/_authenticated/_dashboard/dashboard/_admin-only/manage-users": {
+      "filePath": "_authenticated/_dashboard/dashboard/_admin-only/manage-users.tsx",
+      "parent": "/_authenticated/_dashboard/dashboard/_admin-only"
+    },
+    "/_authenticated/_dashboard/dashboard/_manager-only/manage-polls": {
+      "filePath": "_authenticated/_dashboard/dashboard/_manager-only/manage-polls.tsx",
+      "parent": "/_authenticated/_dashboard/dashboard/_manager-only"
+    },
+    "/_authenticated/_dashboard/dashboard/_not-for-admin/polls": {
+      "filePath": "_authenticated/_dashboard/dashboard/_not-for-admin/polls.tsx",
+      "parent": "/_authenticated/_dashboard/dashboard/_not-for-admin"
+    },
+    "/_authenticated/_dashboard/dashboard/_not-for-admin/tickets": {
+      "filePath": "_authenticated/_dashboard/dashboard/_not-for-admin/tickets.tsx",
+      "parent": "/_authenticated/_dashboard/dashboard/_not-for-admin"
     }
   }
 }
